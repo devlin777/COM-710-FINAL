@@ -22,9 +22,37 @@
             </div>
 
             <div class="nav-center">
-                <input type="text" id="searchInput" class="search-input"
+                <div class="search-category-container">
+                  <input type="text" id="searchInput" class="search-input"
                     placeholder='Search for recipes (e.g. "Pizza" or "Egg")' />
-            </div>
+              
+                  <div class="dropdown" id="categoryDropdown">
+                    <button class="dropdown-toggle">
+                      <i class="fas fa-filter"></i> Categories
+                    </button>
+                    <div class="dropdown-menu">
+                      <button data-category="" class="dropdown-item">
+                        <i class="fas fa-book-open"></i> All Categories
+                      </button>
+                      <button data-category="breakfast" class="dropdown-item">
+                        <i class="fas fa-egg"></i> Breakfast
+                      </button>
+                      <button data-category="lunch" class="dropdown-item">
+                        <i class="fas fa-utensils"></i> Lunch
+                      </button>
+                      <button data-category="dinner" class="dropdown-item">
+                        <i class="fas fa-drumstick-bite"></i> Dinner
+                      </button>
+                      <button data-category="desserts" class="dropdown-item">
+                        <i class="fas fa-ice-cream"></i> Desserts
+                      </button>
+                      <button data-category="vegetarian" class="dropdown-item">
+                        <i class="fas fa-leaf"></i> Vegetarian
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
             <div class="nav-right">
                 <button id="darkToggle" title="Toggle Dark Mode">🌙</button>
@@ -33,32 +61,8 @@
             </div>
         </nav>
 
-        <!-- CATEGORY DROPDOWN BELOW SEARCH, RIGHT SIDE -->
-        <div class="dropdown" id="categoryDropdown">
-            <button class="dropdown-toggle">
-                <i class="fas fa-filter"></i> Categories
-            </button>
-            <div class="dropdown-menu">
-                <button data-category="" class="dropdown-item">
-                    <i class="fas fa-book-open"></i> All Categories
-                </button>
-                <button data-category="breakfast" class="dropdown-item">
-                    <i class="fas fa-egg"></i> Breakfast
-                </button>
-                <button data-category="lunch" class="dropdown-item">
-                    <i class="fas fa-utensils"></i> Lunch
-                </button>
-                <button data-category="dinner" class="dropdown-item">
-                    <i class="fas fa-drumstick-bite"></i> Dinner
-                </button>
-                <button data-category="desserts" class="dropdown-item">
-                    <i class="fas fa-ice-cream"></i> Desserts
-                </button>
-                <button data-category="vegetarian" class="dropdown-item">
-                    <i class="fas fa-leaf"></i> Vegetarian
-                </button>
-            </div>
-        </div>
+       
+        
     </header>
 
     <!-- MAIN CONTENT -->
@@ -68,21 +72,40 @@
             <a href="recipe.html">
             <article class="recipe-card" data-category="noodles">
                 <img src="images/bowl breakfast fruits.jpg" alt="Egg Fried Noodles" />
-                <h3>Egg Fried Noodles</h3>
+                <h3>Bowl Breakfast fruits</h3>
             </article>
             </a>
             <a href="recipe.html">
             <article class="recipe-card" data-category="salad">
                 <img src="images/Grapes banana breakfast.jpg" alt="Caesar Salad" />
-                <h3>Caesar Salad</h3>
+                <h3>Grapes Banana Breakfast</h3>
             </article>
             </a>
             <a href="recipe.html">
             <article class="recipe-card" data-category="salad">
                 <img src="images/Toast Eggs breakfast.jpg" alt="Caesar Salad" />
-                <h3>Caesar Salad</h3>
+                <h3>Toast Eggs</h3>
             </article>
             </a>
+            <a href="recipe.html">
+                <article class="recipe-card" data-category="salad">
+                    <img src="images/biryani-8326234_1280.jpg" alt="Caesar Salad" />
+                    <h3>Biryani</h3>
+                </article>
+                </a>
+                <a href="recipe.html">
+                    <article class="recipe-card" data-category="salad">
+                        <img src="images/hamburger-494706_1280.jpg" alt="Caesar Salad" />
+                        <h3>Hamburger</h3>
+                    </article>
+                    </a>
+                    <a href="recipe.html">
+                        <article class="recipe-card" data-category="salad">
+                            <img src="images/asparagus-803490_1280.jpg" alt="Caesar Salad" />
+                            <h3>Asparagus</h3>
+                        </article>
+                        </a>
+
 
             <!-- More cards populated dynamically -->
         </section>
