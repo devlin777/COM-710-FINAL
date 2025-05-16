@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Create Recipe</title>
+  <link rel="stylesheet" href="/src/styles.css" />
+</head>
+<body>
+  <div class="auth-container">
+    <h2>Create New Recipe</h2>
+    <form id="recipeForm">
+      <input type="text" id="title" placeholder="Title" required />
+      <input type="text" id="image" placeholder="Image URL" />
+      <input type="text" id="ingredients" placeholder="Ingredients (comma-separated)" required />
+      <textarea id="instructions" placeholder="Instructions" rows="4" required></textarea>
+      <input type="text" id="category" placeholder="Category (e.g., lunch, dessert)" />
+      <button type="submit">Submit Recipe</button>
+    </form>
+    <p><a href="index.html">← Back to Home</a></p>
+  </div>
+
+  <script>
+    document.getElementById('recipeForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const title = document.getElementById('title').value;
+      const image = document.getElementById('image').value;
+      const ingredients = document.getElementById('ingredients').value;
+      const instructions = document.getElementById('instructions').value;
+      const category = document.getElementById('category').value;
+      const userId = localStorage.getItem('userId');
+
+      if (!userId) {
+        alert("Please login first to submit a recipe.");
+        return;
+      }
+
+      const res = await fetch('/api/recipes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, image, ingredients, instructions, category, userId })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert("Recipe submitted!");
+        window.location.href = '/index.html';
+      } else {
+        alert(data.error || 'Failed to submit recipe.');
+      }
+    });
+  </script>
+</body>
+</html>

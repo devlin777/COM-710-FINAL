@@ -2,78 +2,135 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Egg-Fried Noodles - Whiskly</title>
-  <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <title>Recipe Details</title>
+  <link rel="stylesheet" href="/src/styles.css" />
 </head>
-<body class="dark">
-
-  <div class="container" style="padding: 20px; max-width: 900px; margin: auto;">
-    <a href="index.html" style="color: #9333ea; text-decoration: none; display: inline-block; margin-bottom: 15px;">
-      <i class="fas fa-arrow-left"></i> Back
-    </a>
-
-    <img src="images/egg-fried-noodles.jpg" alt="Egg Fried Noodles" style="width: 100%; border-radius: 10px; margin-bottom: 20px;" />
-    <h2 style="text-align: center; margin-bottom: 20px; color: #cbd5e1;">Egg-Fried Noodles</h2>
-
-    <hr style="margin-bottom: 20px; border-color: #334155;" />
-
-    <div style="display: flex; flex-direction: column; gap: 20px;">
-      <div style="display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
-        <!-- Ingredients -->
-        <div style="flex: 1; min-width: 300px;">
-          <h3 style="color: #facc15;">Ingredients</h3>
-          <ul style="list-style: disc; padding-left: 20px;">
-            <li>mie noodles</li>
-            <li>4 eggs</li>
-            <li>2 tbsp soy sauce</li>
-            <li>50 ml water</li>
-            <li>3 carrots</li>
-            <li>1 leek</li>
-            <li>3 spring onions</li>
-            <li>4 tbsp sunflower oil</li>
-          </ul>
-        </div>
-
-        <!-- Instructions -->
-        <div style="flex: 2; min-width: 300px;">
-          <h3 style="color: #facc15;">Instructions</h3>
-          <ol style="padding-left: 20px;">
-            <li>Cook the noodles in plenty of water according to the packet instructions, drain and rinse with cold water.</li>
-            <li>Break the eggs into a bowl and mix with 1/2 tsp garlic pepper. Mix the other 1/2 tsp garlic pepper with soy sauce and water in a small bowl.</li>
-            <li>Peel the carrots, cut into thin slices, then into very thin strips. Slice leek and spring onions thinly. Wash and clean them well.</li>
-            <li>Heat 1 tbsp of oil in a wok pan, add the egg mixture and cook for a minute while stirring. Remove from pan and set aside.</li>
-            <li>Pour the remaining oil into the pan and add the noodles. Stir-fry for 2 minutes. Add the vegetables, deglaze with soy sauce and stir well.</li>
-            <li>Add the eggs and spring onions and mix well.</li>
-          </ol>
-        </div>
+<body>
+  <header class="site-header">
+    <nav class="nav-bar">
+      <div class="nav-left">
+        <a href="index.html" class="logo-link">
+          <img src="images/logo.png" alt="Whiskly Logo" class="logo-small" />
+        </a>
       </div>
-
-      <!-- Comments -->
-      <div style="margin-top: 30px;">
-        <h3 style="margin-bottom: 15px; color: #f1f5f9;">Comments</h3>
-
-        <div style="background-color: #1e293b; padding: 10px; border-radius: 8px; margin-bottom: 10px;">
-          <strong style="color: #c084fc;">nana</strong>: good!
-        </div>
-        <div style="background-color: #1e293b; padding: 10px; border-radius: 8px; margin-bottom: 10px;">
-          <strong style="color: #60a5fa;">david</strong>: nice
-        </div>
-        <div style="background-color: #1e293b; padding: 10px; border-radius: 8px; margin-bottom: 10px;">
-          <strong style="color: #c084fc;">nana</strong>: 97 bitte
-        </div>
-        <div style="background-color: #1e293b; padding: 10px; border-radius: 8px; margin-bottom: 20px;">
-          <strong style="color: #f472b6;">Quexooo</strong>: hi
-        </div>
-
-        <textarea placeholder="Add a comment..." style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #475569; background-color: #1e293b; color: #f1f5f9;"></textarea>
-        <button style="margin-top: 10px; background-color: #9333ea; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer;">
-          Add Comment
-        </button>
+      <div class="nav-center">
+        <h2>Recipe Details</h2>
       </div>
+      <div class="nav-right">
+        <a href="index.html" class="nav-btn">Back</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="main-content">
+    <div id="recipeDetails" class="recipe-details">
+      <p>Loading...</p>
     </div>
-  </div>
 
+    <!-- Like / Favorite -->
+    <div class="recipe-actions" style="margin-top: 20px;">
+      <button id="likeBtn">❤️ Like</button>
+      <button id="favBtn">⭐ Favorite</button>
+      <span id="favCount"></span>
+    </div>
+
+    <!-- Comments -->
+    <div class="comments-section" style="margin-top: 40px;">
+      <h3>Comments</h3>
+      <div id="commentsList">Loading comments...</div>
+
+      <form id="commentForm" style="margin-top: 15px;">
+        <textarea id="commentInput" rows="3" placeholder="Add a comment..." required></textarea><br />
+        <button type="submit">Post Comment</button>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const recipeId = params.get('id');
+    const userId = localStorage.getItem('userId');
+
+    async function loadRecipe() {
+      if (!recipeId) {
+        document.getElementById('recipeDetails').innerHTML = '<p>No recipe ID found in URL.</p>';
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/recipes/${recipeId}`);
+        const recipe = await res.json();
+
+        if (!res.ok) throw new Error(recipe.error || 'Failed to load recipe');
+
+        document.getElementById('recipeDetails').innerHTML = `
+          <h2>${recipe.title}</h2>
+          <img src="${recipe.image || 'https://via.placeholder.com/400'}" alt="${recipe.title}" style="max-width: 100%; border-radius: 8px;" />
+          <h3>Ingredients</h3>
+          <p>${recipe.ingredients || 'N/A'}</p>
+          <h3>Instructions</h3>
+          <p>${recipe.instructions || 'N/A'}</p>
+        `;
+      } catch (err) {
+        document.getElementById('recipeDetails').innerHTML = `<p>Error: ${err.message}</p>`;
+      }
+    }
+
+    async function loadFavorites() {
+      const res = await fetch(`/api/recipes/${recipeId}/favorites`);
+      const data = await res.json();
+      document.getElementById('favCount').textContent = `⭐ Favorited by ${data.count} users`;
+    }
+
+    async function loadComments() {
+      const res = await fetch(`/api/recipes/${recipeId}/comments`);
+      const comments = await res.json();
+      const list = document.getElementById('commentsList');
+      list.innerHTML = comments.length
+        ? comments.map(c => `<p><strong>${c.username}:</strong> ${c.content}</p>`).join('')
+        : '<p>No comments yet.</p>';
+    }
+
+    document.getElementById('likeBtn').addEventListener('click', () => {
+      alert('❤️ Like clicked (optional feature)');
+    });
+
+    document.getElementById('favBtn').addEventListener('click', async () => {
+      if (!userId) return alert('Please login to favorite');
+      const res = await fetch(`/api/recipes/${recipeId}/favorite`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId })
+      });
+      const data = await res.json();
+      alert(data.message || 'Favorited');
+      loadFavorites();
+    });
+
+    document.getElementById('commentForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const content = document.getElementById('commentInput').value.trim();
+      if (!userId) return alert('Please login to comment');
+      if (!content) return;
+
+      const res = await fetch(`/api/recipes/${recipeId}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content, userId })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        document.getElementById('commentInput').value = '';
+        loadComments();
+      } else {
+        alert(data.error || 'Failed to post comment');
+      }
+    });
+
+    loadRecipe();
+    loadFavorites();
+    loadComments();
+  </script>
 </body>
 </html>

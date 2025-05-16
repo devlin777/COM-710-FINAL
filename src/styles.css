@@ -279,3 +279,114 @@ body.dark a:hover {
     justify-content: center;
   }
 }
+
+/* Auth Form Styling */
+
+.auth-container {
+  max-width: 400px;
+  margin: 80px auto;
+  padding: 30px;
+  background: #1e1e1e;
+  color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
+}
+
+.auth-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.auth-container input,
+.auth-container button {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 6px;
+  border: none;
+}
+
+.auth-container button {
+  background-color: #f97316;
+  color: #fff;
+  cursor: pointer;
+}
+
+.auth-container button:hover {
+  background-color: #ea580c;
+}
+
+.auth-container a {
+  color: #facc15;
+}
+
+/*Recipe Form styling*/
+.recipe-form {
+  display: flex;
+  flex-direction: column;
+  max-width: 600px;
+  margin: 2rem auto;
+  gap: 1rem;
+  padding: 2rem;
+  background: #1e1e1e;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+.recipe-form input,
+.recipe-form textarea {
+  padding: 0.8rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #2a2a2a;
+  color: #fff;
+}
+
+.recipe-form input::placeholder,
+.recipe-form textarea::placeholder {
+  color: #aaa;
+}
+
+.recipe-form .submit-btn {
+  padding: 0.8rem;
+  font-size: 1rem;
+  background-color: #ff6600;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.recipe-form .submit-btn:hover {
+  background-color: #e65c00;
+}
+
+
+/* Highlight Add Recipe Button */
+.nav-btn.add-recipe {
+  background-color: #6366f1;
+  color: white;
+  font-weight: bold;
+}
+.nav-btn.add-recipe:hover {
+  background-color: #4f46e5;
+}
+
+/* Add spacing between header buttons */
+.nav-right a.nav-btn,
+.nav-right button.nav-btn {
+  margin-left: 0.5rem;
+}
+
+/* Dark mode support for recipe form */
+body.dark .recipe-form {
+  background-color: #252525;
+}
+body.dark .recipe-form input,
+body.dark .recipe-form textarea {
+  background: #333;
+  border: 1px solid #444;
+  color: #eee;
+}

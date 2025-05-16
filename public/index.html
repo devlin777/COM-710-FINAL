@@ -2,144 +2,174 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ChefChecker - Recipe Finder</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <link rel="stylesheet" href="/src/styles.css" />
-    <script src="/src/script.js" defer></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChefChecker - Recipe Finder</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="/src/styles.css" />
+  <script src="/src/script.js" defer></script>
 </head>
 
 <body>
-    <!-- HEADER -->
-    <header class="site-header">
-        <nav class="nav-bar">
-            <div class="nav-left">
-                <a href="index.html" class="logo-link">
-                    <img src="images/logo.png" alt="Whiskly Logo" class="logo-small" />
-                </a>
+  <!-- HEADER -->
+  <header class="site-header">
+    <nav class="nav-bar">
+      <div class="nav-left">
+        <a href="index.html" class="logo-link">
+          <img src="images/logo.png" alt="Whiskly Logo" class="logo-small" />
+        </a>
 
+      </div>
+
+      <div class="nav-center">
+        <div class="search-category-container">
+          <input type="text" id="searchInput" class="search-input"
+            placeholder='Search for recipes (e.g. "Pizza" or "Egg")' />
+
+          <div class="dropdown" id="categoryDropdown">
+            <button class="dropdown-toggle">
+              <i class="fas fa-filter"></i> Categories
+            </button>
+            <div class="dropdown-menu">
+              <button data-category="" class="dropdown-item">
+                <i class="fas fa-book-open"></i> All Categories
+              </button>
+              <button data-category="breakfast" class="dropdown-item">
+                <i class="fas fa-egg"></i> Breakfast
+              </button>
+              <button data-category="lunch" class="dropdown-item">
+                <i class="fas fa-utensils"></i> Lunch
+              </button>
+              <button data-category="dinner" class="dropdown-item">
+                <i class="fas fa-drumstick-bite"></i> Dinner
+              </button>
+              <button data-category="desserts" class="dropdown-item">
+                <i class="fas fa-ice-cream"></i> Desserts
+              </button>
+              <button data-category="vegetarian" class="dropdown-item">
+                <i class="fas fa-leaf"></i> Vegetarian
+              </button>
             </div>
-
-            <div class="nav-center">
-                <div class="search-category-container">
-                  <input type="text" id="searchInput" class="search-input"
-                    placeholder='Search for recipes (e.g. "Pizza" or "Egg")' />
-              
-                  <div class="dropdown" id="categoryDropdown">
-                    <button class="dropdown-toggle">
-                      <i class="fas fa-filter"></i> Categories
-                    </button>
-                    <div class="dropdown-menu">
-                      <button data-category="" class="dropdown-item">
-                        <i class="fas fa-book-open"></i> All Categories
-                      </button>
-                      <button data-category="breakfast" class="dropdown-item">
-                        <i class="fas fa-egg"></i> Breakfast
-                      </button>
-                      <button data-category="lunch" class="dropdown-item">
-                        <i class="fas fa-utensils"></i> Lunch
-                      </button>
-                      <button data-category="dinner" class="dropdown-item">
-                        <i class="fas fa-drumstick-bite"></i> Dinner
-                      </button>
-                      <button data-category="desserts" class="dropdown-item">
-                        <i class="fas fa-ice-cream"></i> Desserts
-                      </button>
-                      <button data-category="vegetarian" class="dropdown-item">
-                        <i class="fas fa-leaf"></i> Vegetarian
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-            <div class="nav-right">
-                <button id="darkToggle" title="Toggle Dark Mode">🌙</button>
-                <a href="register.html" class="nav-btn">Register</a>
-                <a href="login.html" class="nav-btn">Login</a>
-            </div>
-        </nav>
-
-       
-        
-    </header>
-
-    <!-- MAIN CONTENT -->
-    <main class="main-content">
-        <section id="recipeGrid" class="recipe-grid">
-            <!-- Recipes dynamically loaded with JS or backend -->
-            <a href="recipe.html">
-            <article class="recipe-card" data-category="noodles">
-                <img src="images/bowl breakfast fruits.jpg" alt="Egg Fried Noodles" />
-                <h3>Bowl Breakfast fruits</h3>
-            </article>
-            </a>
-            <a href="recipe.html">
-            <article class="recipe-card" data-category="salad">
-                <img src="images/Grapes banana breakfast.jpg" alt="Caesar Salad" />
-                <h3>Grapes Banana Breakfast</h3>
-            </article>
-            </a>
-            <a href="recipe.html">
-            <article class="recipe-card" data-category="salad">
-                <img src="images/Toast Eggs breakfast.jpg" alt="Caesar Salad" />
-                <h3>Toast Eggs</h3>
-            </article>
-            </a>
-            <a href="recipe.html">
-                <article class="recipe-card" data-category="salad">
-                    <img src="images/biryani-8326234_1280.jpg" alt="Caesar Salad" />
-                    <h3>Biryani</h3>
-                </article>
-                </a>
-                <a href="recipe.html">
-                    <article class="recipe-card" data-category="salad">
-                        <img src="images/hamburger-494706_1280.jpg" alt="Caesar Salad" />
-                        <h3>Hamburger</h3>
-                    </article>
-                    </a>
-                    <a href="recipe.html">
-                        <article class="recipe-card" data-category="salad">
-                            <img src="images/asparagus-803490_1280.jpg" alt="Caesar Salad" />
-                            <h3>Asparagus</h3>
-                        </article>
-                        </a>
-
-
-            <!-- More cards populated dynamically -->
-        </section>
-
-        <div class="pagination">
-            <button>« Prev</button>
-            <button class="active">1</button>
-            <button>2</button>
-            <button>Next »</button>
+          </div>
         </div>
-    </main>
+      </div>
 
-    <!-- FOOTER -->
-    <footer class="site-footer">
-        <div class="footer-column">
-            <p>Solent University</p>
-            <p>East Park Terrace, Southampton</p>
-            <p>Visitor Counter: <span id="visitorCounter">1423</span></p>
-        </div>
-        <div class="footer-column">
-            <p id="siteIntro">Welcome to our global recipe hub!</p>
-            <label for="langSelect">🌐 Language:</label>
-            <select id="langSelect">
-                <option value="en">English</option>
-                <option value="fr">Français</option>
-                <option value="es">Español</option>
-            </select>
-        </div>
-        <div class="footer-column">
-            <p>Follow us:</p>
-            <a href="#" target="_blank">Twitter</a> |
-            <a href="#" target="_blank">Instagram</a>
-        </div>
-    </footer>
+      <div class="nav-right" id="navRight">
+        <button id="darkToggle" title="Toggle Dark Mode">🌙</button>
+        <!-- Buttons will be injected here -->
+      </div>
+
+    </nav>
+
+
+
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <section id="recipeGrid" class="recipe-grid">
+      <!-- Recipes will load here dynamically -->
+    </section>
+
+    <div class="pagination">
+      <button disabled>« Prev</button>
+      <button class="active">1</button>
+      <button disabled>Next »</button>
+    </div>
+  </main>
+
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-column">
+      <p>Solent University</p>
+      <p>East Park Terrace, Southampton</p>
+      <p>Visitor Counter: <span id="visitorCounter">1423</span></p>
+    </div>
+    <div class="footer-column">
+      <p id="siteIntro">Welcome to our global recipe hub!</p>
+      <label for="langSelect">🌐 Language:</label>
+      <select id="langSelect">
+        <option value="en">English</option>
+        <option value="fr">Français</option>
+        <option value="es">Español</option>
+      </select>
+    </div>
+    <div class="footer-column">
+      <p>Follow us:</p>
+      <a href="#" target="_blank">Twitter</a> |
+      <a href="#" target="_blank">Instagram</a>
+    </div>
+  </footer>
+
+
+  <script>
+    const navRight = document.getElementById('navRight');
+    const userId = localStorage.getItem('userId');
+
+    const authButtons = userId
+      ? `
+        <a href="create.html" class="nav-btn add-recipe">➕ Add Recipe</a>
+        <button id="logoutBtn" class="nav-btn">Logout</button>
+      `
+      : `
+        <a href="register.html" class="nav-btn">Register</a>
+        <a href="login.html" class="nav-btn">Login</a>
+      `;
+
+    if (navRight) navRight.insertAdjacentHTML("beforeend", authButtons);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+          localStorage.removeItem('userId');
+          window.location.reload();
+        });
+      }
+    });
+
+    async function loadRecipe() {
+      const params = new URLSearchParams(window.location.search);
+      const recipeId = params.get("id");
+
+      if (!recipeId) {
+        const el = document.getElementById("recipeDetails");
+        if (el) el.innerHTML = '<p>No recipe selected.</p>';
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/recipes/${recipeId}`);
+        const recipe = await res.json();
+
+        if (!res.ok) {
+          throw new Error(recipe.error || 'Failed to load recipe');
+        }
+
+        const el = document.getElementById("recipeDetails");
+        if (el) {
+          el.innerHTML = `
+          <h2>${recipe.title}</h2>
+          <img src="${recipe.image || 'https://via.placeholder.com/400'}" alt="${recipe.title}" style="max-width: 100%; border-radius: 8px;" />
+          <h3>Ingredients</h3>
+          <p>${recipe.ingredients || 'N/A'}</p>
+          <h3>Instructions</h3>
+          <p>${recipe.instructions || 'N/A'}</p>
+        `;
+        }
+      } catch (err) {
+        const el = document.getElementById("recipeDetails");
+        if (el) el.innerHTML = `<p>Error: ${err.message}</p>`;
+      }
+    }
+
+    loadRecipe();
+  </script>
+
+
+
+
 </body>
 
 </html>

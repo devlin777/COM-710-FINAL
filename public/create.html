@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Add New Recipe</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+</head>
+
+<body>
+    <header class="site-header">
+        <nav class="nav-bar">
+            <div class="nav-left">
+                <a href="index.html" class="logo-link">
+                    <img src="images/logo.png" alt="Whiskly Logo" class="logo-small" />
+                </a>
+            </div>
+            <div class="nav-center">
+                <h2>Add New Recipe</h2>
+            </div>
+            <div class="nav-right">
+                <a href="index.html" class="nav-btn">Back</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <form id="recipeForm" class="recipe-form" enctype="multipart/form-data">
+            <h2>Create a New Recipe</h2>
+
+            <label for="title">Title</label>
+            <input type="text" id="title" name="title" placeholder="Enter recipe title" required />
+
+            <label for="image">Image</label>
+            <input type="file" id="image" name="image" accept="image/*" required />
+
+            <label for="ingredients">Ingredients</label>
+            <textarea id="ingredients" name="ingredients" placeholder="List ingredients..." required></textarea>
+
+            <label for="instructions">Instructions</label>
+            <textarea id="instructions" name="instructions" placeholder="Step-by-step instructions..."
+                required></textarea>
+
+            <label for="category">Category</label>
+            <select id="category" name="category" required>
+                <option value="">Select a category</option>
+                <option value="breakfast">Breakfast</option>
+                <option value="lunch">Lunch</option>
+                <option value="dinner">Dinner</option>
+                <option value="desserts">Desserts</option>
+                <option value="vegetarian">Vegetarian</option>
+            </select>
+
+            <label for="visibility">Visibility</label>
+            <select id="visibility" name="visibility" required>
+                <option value="public">Public</option>
+                <option value="private">Private</option>
+            </select>
+
+            <button type="submit" class="submit-btn">Create Recipe</button>
+        </form>
+    </main>
+
+    <script>
+        document.getElementById('recipeForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userId = localStorage.getItem('userId');
+            if (!userId) return alert('You must be logged in to submit a recipe.');
+
+            const form = document.getElementById('recipeForm');
+            const formData = new FormData(form);
+            formData.append('userId', userId);
+
+            try {
+                const res = await fetch('/api/recipes', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert('Recipe submitted successfully!');
+                    window.location.href = 'index.html';
+                } else {
+                    alert(data.error || 'Failed to submit recipe');
+                }
+            } catch (err) {
+                alert('An error occurred while submitting the recipe.');
+            }
+        });
+    </script>
+</body>
+
+</html>
