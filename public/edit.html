@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Add New Recipe</title>
+  <title>Edit Recipe</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="/src/styles.css" />
 
@@ -28,10 +28,11 @@
     .img-picker {display:grid; gap:.5rem;}
     .img-preview {width:100%; height: 200px; object-fit:cover; border-radius: 10px; background:#0f1115; border:1px dashed #374151; display:none;}
 
-    .submit-row {margin-top: 1.2rem;}
+    .submit-row {margin-top: 1.2rem; display:grid; gap:.6rem;}
     .submit-btn {width:100%; padding:.9rem 1rem; border:0; border-radius: 10px; cursor:pointer; font-weight:700;
-      background:#f97316; color:#111827; box-shadow:0 8px 16px rgba(249,115,22,.2);}
+      background:#6366f1; color:#111827; box-shadow:0 8px 16px rgba(99,102,241,.2);}
     .submit-btn:disabled{opacity:.7; cursor:not-allowed;}
+    .back-btn {width:100%; padding:.8rem 1rem; border:1px solid #374151; border-radius:10px; background:#1b1f26; color:#e5e7eb; cursor:pointer;}
     .err {margin-top:.75rem; color:#fda4af; font-size:.95rem;}
   </style>
 </head>
@@ -46,10 +47,10 @@
         </a>
       </div>
       <div class="nav-center">
-        <h2>Add New Recipe</h2>
+        <h2>Edit Recipe</h2>
       </div>
       <div class="nav-right">
-        <a href="index.html" class="nav-btn">Back</a>
+        <a href="index.html" class="nav-btn">Home</a>
       </div>
     </nav>
   </header>
@@ -57,12 +58,12 @@
   <!-- main -->
   <main class="main-content">
     <section class="form-card">
-      <h1 class="form-title">Create a New Recipe</h1>
+      <h1 class="form-title">Update Recipe</h1>
 
       <!-- error message -->
       <p id="formErr" class="err" role="alert" style="display:none;"></p>
 
-      <form id="recipeForm" enctype="multipart/form-data" novalidate>
+      <form id="editForm" enctype="multipart/form-data" novalidate>
         <!-- title -->
         <div class="form-row">
           <label for="title">Title <span class="req">*</span></label>
@@ -71,13 +72,19 @@
           <div class="hint">3–100 characters.</div>
         </div>
 
-        <!-- image -->
+        <!-- current image -->
         <div class="form-row img-picker">
-          <label for="image">Image (optional)</label>
+          <label>Current Image</label>
+          <img id="currentImg" class="img-preview" alt="Current image" />
+          <div class="hint">If you don’t upload a new image, the current one stays.</div>
+        </div>
+
+        <!-- new image -->
+        <div class="form-row img-picker">
+          <label for="image">Replace Image (optional)</label>
           <input id="image" name="image" class="inpt" type="file"
                  accept="image/png, image/jpeg, image/webp, image/gif" />
-          <img id="preview" class="img-preview" alt="Preview" />
-          <div class="hint">PNG, JPG, WEBP, or GIF. Up to ~3MB supported by server.</div>
+          <img id="preview" class="img-preview" alt="Preview new image" />
         </div>
 
         <!-- ingredients -->
@@ -119,21 +126,22 @@
           <div>
             <label for="visibility">Visibility</label>
             <select id="visibility" name="visibility" class="sel" required>
-              <option value="public" selected>Public</option>
+              <option value="public">Public</option>
               <option value="private">Private</option>
             </select>
           </div>
         </div>
 
-        <!-- submit -->
+        <!-- submit/back -->
         <div class="submit-row">
-          <button type="submit" class="submit-btn" id="submitBtn">Create Recipe</button>
+          <button type="submit" class="submit-btn" id="saveBtn">Save Changes</button>
+          <button type="button" class="back-btn" id="cancelBtn">Cancel</button>
         </div>
       </form>
     </section>
   </main>
 
   <!-- page script -->
-  <script src="/src/create.js" defer></script>
+  <script src="/src/edit.js" defer></script>
 </body>
 </html>

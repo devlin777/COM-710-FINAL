@@ -1,5 +1,6 @@
-
-/* Reset + Base */
+/* =========================
+   Reset + Base
+========================= */
 * {
   margin: 0;
   padding: 0;
@@ -32,9 +33,11 @@ body.dark a:hover {
   color: #fbbf24;
 }
 
-/* Header */
+/* =========================
+   Header
+========================= */
 .site-header {
-  background-image: url("../public/images/header-bg.jpg");
+  background-image: url("/images/header-bg.jpg"); /* fixed path */
   background-size: cover;
   color: white;
   padding-bottom: 0;
@@ -56,7 +59,9 @@ body.dark a:hover {
   margin-left: 10px;
 }
 
-/* Navbar */
+/* =========================
+   Navbar
+========================= */
 .nav-bar {
   display: flex;
   justify-content: space-between;
@@ -100,7 +105,7 @@ body.dark a:hover {
 
 .nav-btn,
 #darkToggle {
-  background-color: #f97316;
+  background-color: #f97316;  /* site accent */
   color: #121212;
   padding: 8px 12px;
   border: none;
@@ -109,51 +114,143 @@ body.dark a:hover {
   cursor: pointer;
 }
 
-/* Dropdown */
-.dropdown {
-  position: relative;
-  display: inline-block;
-}
+/* =========================
+   Dropdown (JS-toggled)
+========================= */
+.dropdown { position: relative; display: inline-block; }
 
-.dropdown-toggle {
-  background-color: #334155;
-  color: white;
+/* button */
+.dropdown-toggle{
+  background: #334155;
+  color: #fff;
   padding: 10px 14px;
-  border: none;
+  border: 0;
   border-radius: 6px;
   cursor: pointer;
 }
 
-.dropdown-menu {
+/* panel (hidden by default) */
+.dropdown-menu{
   position: absolute;
-  top: 100%;
+  top: calc(100% + 8px);
   left: 0;
-  background-color: #334155;
-  border-radius: 8px;
-  display: none;
+  display: none;               /* shown when .dropdown has .open */
   flex-direction: column;
-  z-index: 1000;
-  min-width: 200px;
-  padding: 10px 0;
+  min-width: 220px;
+  padding: 8px 0;
+  border-radius: 10px;
+  background: #334155;
+  color: #fff;
+  box-shadow: 0 12px 28px rgba(0,0,0,.25);
+  z-index: 3000;               /* sit above cards */
 }
 
-.dropdown-item {
-  background: none;
-  border: none;
-  color: white;
-  padding: 10px 20px;
-  font-size: 16px;
+/* show when JS toggles */
+.dropdown.open .dropdown-menu{ display: flex; }
+
+/* items */
+.dropdown-item{
+  background: transparent;
+  border: 0;
+  color: inherit;
+  padding: 10px 14px;
+  font-size: 15px;
   display: flex;
   align-items: center;
   gap: 10px;
   cursor: pointer;
 }
+.dropdown-item:hover{ background: rgba(255,255,255,.08); }
+.dropdown-item.is-active{ background: rgba(255,255,255,.12); }
 
+/* light theme */
+body:not(.dark) .dropdown-toggle{ background: #e5e7eb; color: #111827; }
+body:not(.dark) .dropdown-menu{
+  background: #ffffff;
+  color: #1f2937;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 24px rgba(0,0,0,.08);
+}
+body:not(.dark) .dropdown-item:hover{ background: rgba(0,0,0,.04); }
+body:not(.dark) .dropdown-item.is-active{ background: rgba(0,0,0,.06); }
+
+/* ensure navbar never clips the menu */
+.nav-bar{ position: relative; z-index: 2000; overflow: visible; }
+
+
+/* Hover open (desktop) */
 .dropdown:hover .dropdown-menu {
   display: flex;
 }
 
-/* Main Content */
+/* Click-to-open (mobile & accessibility) */
+.dropdown.open .dropdown-menu {
+  display: flex;
+}
+
+/* Focus ring on toggle */
+.dropdown-toggle:focus {
+  outline: 2px solid #f97316;
+  outline-offset: 2px;
+}
+
+/* =========================
+   Dropdown (accented, best UX)
+========================= */
+
+/* Hover/Focus feedback uses site accent (#f97316) */
+.dropdown .dropdown-item:hover,
+.dropdown .dropdown-item:focus {
+  background: rgba(249, 115, 22, 0.14);
+  outline: none;
+}
+
+/* Persistently highlight the selected category */
+.dropdown .dropdown-item.is-active {
+  background: linear-gradient(90deg, rgba(249,115,22,0.18), transparent 70%);
+  position: relative;
+}
+
+/* Accent bar on the left for active item */
+.dropdown .dropdown-item.is-active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 2px;
+  background: #f97316;
+}
+
+/* Toggle visual when open/hovered */
+.dropdown.open .dropdown-toggle,
+.dropdown .dropdown-toggle:hover {
+  box-shadow: 0 0 0 3px rgba(249,115,22,0.25) inset;
+}
+
+/* When expanded, slightly lift the toggle background */
+.dropdown .dropdown-toggle[aria-expanded="true"] {
+  background-color: #475569;
+}
+
+/* Dark mode tuned versions */
+body.dark .dropdown .dropdown-item:hover,
+body.dark .dropdown .dropdown-item:focus {
+  background: rgba(249,115,22,0.22);
+}
+
+body.dark .dropdown .dropdown-item.is-active {
+  background: linear-gradient(90deg, rgba(249,115,22,0.22), transparent 70%);
+}
+
+body.dark .dropdown .dropdown-toggle[aria-expanded="true"] {
+  background-color: #3a475a;
+}
+
+/* =========================
+   Main Content
+========================= */
 .main-content {
   padding: 20px;
 }
@@ -170,6 +267,7 @@ body.dark a:hover {
   align-items: center;
   gap: 10px;
 }
+
 .search-section input,
 .search-section select {
   padding: 8px;
@@ -178,7 +276,9 @@ body.dark a:hover {
   border-radius: 5px;
 }
 
-/* Recipe Grid */
+/* =========================
+   Recipe Grid
+========================= */
 .recipe-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -188,28 +288,73 @@ body.dark a:hover {
   margin: 0 auto;
 }
 
+/* Card */
 .recipe-card {
-  background-color: #f3f4f6;
+  position: relative;
+  background: linear-gradient(180deg, #ffffff, #f3f4f6);
   padding: 10px;
-  border-radius: 10px;
+  border-radius: 12px;
   text-align: center;
-  transition: transform 0.2s;
   overflow: hidden;
   height: 280px;
+
+  /* interactions */
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  box-shadow: 0 6px 18px rgba(0,0,0,.08);
+  transition: transform .2s ease, box-shadow .2s ease;
 }
 
+.recipe-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 12px 26px rgba(0,0,0,.12);
+}
+
+/* Image */
 .recipe-card img {
   width: 100%;
   height: 180px;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 10px;
+  transition: transform .3s ease;
 }
-
-.recipe-card:hover {
+.recipe-card:hover img {
   transform: scale(1.03);
 }
 
-/* Pagination */
+/* Title */
+.recipe-card h3 {
+  margin-top: 10px;
+  font-size: 1rem;
+  line-height: 1.25rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;    /* keep grid even */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Focus (keyboard) */
+.recipe-card:focus,
+.recipe-card:focus-visible {
+  outline: 3px solid #f97316;  /* site accent */
+  outline-offset: 3px;
+  border-radius: 12px;
+}
+
+/* Dark mode adjustments */
+body.dark .recipe-card {
+  background: #222;
+  box-shadow: 0 6px 18px rgba(0,0,0,.35);
+}
+body.dark .recipe-card:hover {
+  box-shadow: 0 12px 26px rgba(0,0,0,.45);
+}
+
+/* =========================
+   Pagination
+========================= */
 .pagination {
   margin-top: 20px;
   text-align: center;
@@ -224,12 +369,20 @@ body.dark a:hover {
   cursor: pointer;
 }
 
-.pagination .active {
-  background-color: #9333ea;
-  color: white;
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-/* Footer */
+.pagination .active {
+  background-color: #f97316; /* site accent */
+  color: #121212;
+  font-weight: 700;
+}
+
+/* =========================
+   Footer
+========================= */
 .site-footer {
   background-color: #1a1a1a;
   padding: 20px;
@@ -244,7 +397,29 @@ body.dark a:hover {
   padding: 10px;
 }
 
-/* Responsive */
+/* footer layout wrapper */
+.site-footer .footer-inner{
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  gap: 24px;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  padding: 0 16px;
+}
+
+/* small disclaimer line */
+.site-footer .disclaimer{
+  margin-top: 6px;
+  font-size: 0.9rem;
+  opacity: 0.75;
+}
+
+
+/* =========================
+   Responsive
+========================= */
 @media (max-width: 1024px) {
   .recipe-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -280,8 +455,9 @@ body.dark a:hover {
   }
 }
 
-/* Auth Form Styling */
-
+/* =========================
+   Auth Form Styling
+========================= */
 .auth-container {
   max-width: 400px;
   margin: 80px auto;
@@ -320,7 +496,9 @@ body.dark a:hover {
   color: #facc15;
 }
 
-/*Recipe Form styling*/
+/* =========================
+   Recipe Form Styling
+========================= */
 .recipe-form {
   display: flex;
   flex-direction: column;
@@ -363,15 +541,15 @@ body.dark a:hover {
   background-color: #e65c00;
 }
 
-
 /* Highlight Add Recipe Button */
 .nav-btn.add-recipe {
-  background-color: #6366f1;
-  color: white;
-  font-weight: bold;
+  background-color: #f97316;  /* site accent */
+  color: #121212;
+  font-weight: 700;
 }
 .nav-btn.add-recipe:hover {
-  background-color: #4f46e5;
+  background-color: #ea580c;  /* slightly darker on hover */
+  color: #121212;
 }
 
 /* Add spacing between header buttons */
@@ -389,4 +567,632 @@ body.dark .recipe-form textarea {
   background: #333;
   border: 1px solid #444;
   color: #eee;
+}
+
+/* Dark mode refinements for new UI bits */
+body.dark .dropdown-toggle,
+body.dark .dropdown-menu { background-color: #2a2a2a; }
+body.dark .dropdown-item { color: #f5f5f5; }
+body.dark .recipe-card { background-color: #222; }
+body.dark .pagination button { background-color: #333; color: #eee; }
+
+/* =========================
+   Recipe Detail Page Styles
+========================= */
+
+/* Scope variables to the detail page only */
+body.recipe-detail {
+  --rd-bg-1:#233142;
+  --rd-bg-2:#2f4156;
+  --rd-bg-3:#3c5066;
+  --rd-text:#e9eef4;
+  --rd-muted:#b9c4d1;
+  --rd-accent:#f97316;  /* unified with site accent */
+  --rd-radius:16px;
+  --rd-shadow:0 10px 30px rgba(0,0,0,.25);
+
+  background: var(--rd-bg-1);
+  color: var(--rd-text);
+}
+
+body.recipe-detail .nav-bar .nav-btn,
+body.recipe-detail .nav-bar a.logo-link,
+body.recipe-detail .nav-bar h2 {
+  color: var(--rd-text);
+}
+
+.rd-container{
+  width:min(1100px,92%);
+  margin:1.2rem auto 3rem;
+}
+
+.rd-hero{
+  width:100%;
+  aspect-ratio:16/9;
+  object-fit:cover;
+  border-radius: calc(var(--rd-radius) + 4px);
+  box-shadow: var(--rd-shadow);
+  background:#111;
+}
+
+.rd-title{
+  text-align:center;
+  font-size: clamp(1.8rem, 2.8vw, 2.4rem);
+  margin: 1rem 0 .3rem;
+}
+
+.rd-meta{
+  text-align:center;
+  color: var(--rd-muted);
+  margin-bottom: 1rem;
+}
+
+.rd-actions{
+  display:flex;
+  gap:.6rem;
+  justify-content:center;
+  align-items:center;
+  margin:.3rem 0 1rem;
+}
+
+.rd-actions button{
+  border:0;
+  padding:.55rem 1rem;
+  border-radius:999px;
+  cursor:pointer;
+  background:var(--rd-accent);
+  color:#1b2230;
+  font-weight:700;
+  box-shadow: var(--rd-shadow);
+}
+
+.rd-actions .pill{
+  color:var(--rd-muted);
+  font-size:.95rem;
+}
+
+.rd-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1.2rem;
+}
+@media (max-width:820px){
+  .rd-grid{ grid-template-columns:1fr; }
+}
+
+.rd-panel{
+  background: var(--rd-bg-2);
+  border-radius: var(--rd-radius);
+  padding: 1.1rem 1.2rem;
+  box-shadow: var(--rd-shadow);
+}
+.rd-panel h3{
+  margin:0 0 .6rem 0;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  padding-bottom:.4rem;
+}
+
+.rd-bullets{ padding-left:1.2rem; }
+.rd-bullets li{ margin:.35rem 0; line-height:1.5; }
+
+.rd-steps{ padding-left:1.2rem; }
+.rd-steps li{ margin:.45rem 0; line-height:1.55; }
+
+.rd-comments{
+  margin-top:1.2rem;
+  background: var(--rd-bg-3);
+}
+
+.rd-comments-list{
+  list-style:none;
+  padding:0;
+  margin:0 0 1rem 0;
+  display:grid;
+  gap:.8rem;
+}
+
+.rd-comment{
+  display:flex;
+  gap:.8rem;
+  align-items:flex-start;
+}
+
+.rd-avatar{
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  background: rgba(255,255,255,.12);
+  display:grid;
+  place-items:center;
+  font-weight:700;
+}
+
+.rd-cmeta{ color: var(--rd-muted); margin-bottom:.15rem; }
+.rd-cbody p{ margin:.25rem 0 0 0; color: var(--rd-text); }
+
+.rd-cform{ display:grid; gap:.6rem; }
+.rd-cform textarea{
+  width:100%;
+  min-height:90px;
+  resize:vertical;
+  color: var(--rd-text);
+  background: rgba(0,0,0,.15);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius:12px;
+  padding:.75rem .9rem;
+}
+.rd-btn{
+  justify-self:start;
+  border:0;
+  border-radius:999px;
+  padding:.6rem 1.1rem;
+  background: var(--rd-accent);
+  color:#1b2230;
+  font-weight:700;
+  cursor:pointer;
+  box-shadow: var(--rd-shadow);
+}
+.rd-muted{ color: var(--rd-muted); }
+
+/* =========================
+   Reduced Motion (accessibility)
+========================= */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+  .recipe-card:hover {
+    transform: none !important;
+  }
+  .recipe-card:hover img {
+    transform: none !important;
+  }
+}
+
+/* Clear filters chip */
+.chip {
+  background: transparent;
+  border: 1.5px solid #f97316;
+  color: #f97316;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease, box-shadow .2s ease;
+}
+.chip:hover {
+  background: #f97316;
+  color: #121212;
+  box-shadow: 0 6px 18px rgba(0,0,0,.12);
+}
+body.dark .chip {
+  border-color: #f97316;
+  color: #f97316;
+}
+body.dark .chip:hover {
+  background: #f97316;
+  color: #121212;
+}
+
+/* Result count badge */
+.result-count {
+  margin-left: 8px;
+  font-size: 0.95rem;
+  color: rgba(31,41,55,0.8);
+}
+.result-count .badge {
+  display: inline-block;
+  min-width: 22px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f97316;
+  color: #121212;
+  font-weight: 700;
+  text-align: center;
+  margin-right: 6px;
+}
+body.dark .result-count { color: rgba(245,245,245,0.8); }
+
+/* ===== Account avatar + menu (navbar right) ===== */
+.nav-right { display: flex; align-items: center; gap: 8px; }
+
+.avatar-wrap { position: relative; }
+
+.avatar-btn {
+  width: 36px; height: 36px;
+  display: grid; place-items: center;
+  border: 0; border-radius: 50%;
+  background: #334155; color: #fff;
+  font-weight: 700; cursor: pointer;
+}
+.avatar-btn:focus { outline: 2px solid #f97316; outline-offset: 2px; }
+
+.menu {
+  position: absolute; right: 0; top: 115%;
+  background: #334155; color: #fff;
+  min-width: 190px; padding: 8px;
+  border-radius: 12px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.25);
+  display: none; z-index: 1000;
+}
+.menu.open { display: block; }
+
+.menu a, .menu button {
+  display: flex; align-items: center; gap: 8px;
+  width: 100%; padding: 10px 12px;
+  background: none; border: 0; color: inherit;
+  text-align: left; border-radius: 8px; cursor: pointer;
+}
+.menu a:hover, .menu button:hover {
+  background: rgba(249,115,22,.14); /* accent wash */
+}
+.menu hr {
+  border: 0; height: 1px; margin: 6px 0;
+  background: rgba(255,255,255,.12);
+}
+
+/* light mode tweak so it still looks good */
+body:not(.dark) .avatar-btn { background: #475569; }
+body:not(.dark) .menu { background: #475569; }
+/* ===== Account avatar + menu (navbar right) ===== */
+.nav-right { display: flex; align-items: center; gap: 8px; }
+
+.avatar-wrap { position: relative; }
+
+.avatar-btn {
+  width: 36px; height: 36px;
+  display: grid; place-items: center;
+  border: 0; border-radius: 50%;
+  background: #334155; color: #fff;
+  font-weight: 700; cursor: pointer;
+}
+.avatar-btn:focus { outline: 2px solid #f97316; outline-offset: 2px; }
+
+.menu {
+  position: absolute; right: 0; top: 115%;
+  background: #334155; color: #fff;
+  min-width: 190px; padding: 8px;
+  border-radius: 12px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.25);
+  display: none; z-index: 1000;
+}
+.menu.open { display: block; }
+
+.menu a, .menu button {
+  display: flex; align-items: center; gap: 8px;
+  width: 100%; padding: 10px 12px;
+  background: none; border: 0; color: inherit;
+  text-align: left; border-radius: 8px; cursor: pointer;
+}
+.menu a:hover, .menu button:hover {
+  background: rgba(249,115,22,.14); /* accent wash */
+}
+.menu hr {
+  border: 0; height: 1px; margin: 6px 0;
+  background: rgba(255,255,255,.12);
+}
+
+/* light mode tweak so it still looks good */
+body:not(.dark) .avatar-btn { background: #475569; }
+body:not(.dark) .menu { background: #475569; }
+
+/* ===== Settings page ===== */
+.settings-wrap {
+  min-height: calc(100vh - 120px);
+  display: grid;
+  place-items: start center;
+  padding: 40px 16px 80px;
+  background: var(--page-bg, transparent);
+}
+.settings-card {
+  width: min(820px, 96%);
+  background: #1f2937;
+  color: #eef2f7;
+  border-radius: 14px;
+  box-shadow: 0 14px 40px rgba(0,0,0,.35);
+  padding: 22px 24px 20px;
+}
+body:not(.dark) .settings-card { background:#f3f4f6; color:#1f2937; }
+.settings-title { text-align:center; margin: 4px 0 14px; }
+
+.fieldset { margin: 14px 0; }
+.fieldset-head {
+  font-weight: 700; margin-bottom: 10px; opacity: .9;
+}
+.row { display: grid; grid-template-columns: 1fr 180px; gap: 14px; align-items: end; }
+@media (max-width: 680px){ .row { grid-template-columns: 1fr; } .avatar-col { justify-self: start; } }
+
+.settings-card label { display:block; margin: 10px 0 6px; opacity: .9; }
+.settings-card input[type="text"],
+.settings-card input[type="email"],
+.settings-card input[type="password"],
+.settings-card textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(0,0,0,.25);
+  color: inherit;
+}
+body:not(.dark) .settings-card input,
+body:not(.dark) .settings-card textarea {
+  background:#fff; border:1px solid #d1d5db; color:#111827;
+}
+
+.password-wrap { position: relative; }
+.password-wrap .eye {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  background: none; border: 0; cursor: pointer; color: inherit; opacity: .8;
+}
+
+.cta {
+  display: inline-block;
+  margin-top: 12px;
+  background: #8b5cf6; color: #fff; border: 0;
+  padding: 10px 14px; border-radius: 8px; cursor: pointer; font-weight: 700;
+}
+.cta:hover { filter: brightness(1.05); }
+
+.ghost-btn {
+  background: rgba(255,255,255,.1); color: inherit; border: 0;
+  padding: 8px 12px; border-radius: 8px; cursor: pointer;
+}
+.ghost-btn:hover { background: rgba(255,255,255,.18); }
+.danger {
+  background: #ef4444; color: #fff; border: 0; padding: 8px 12px; border-radius: 8px; cursor:pointer;
+}
+.danger:hover { filter: brightness(1.05); }
+
+.divider {
+  border: 0; height: 1px; margin: 18px 0;
+  background: rgba(255,255,255,.12);
+}
+body:not(.dark) .divider { background: rgba(0,0,0,.08); }
+
+.actions {
+  display:flex; justify-content: space-between; align-items:center; margin-top: 10px;
+}
+
+.avatar-col { display:grid; justify-items:center; gap: 8px; }
+.avatar-circle {
+  width: 120px; height: 120px; border-radius: 50%;
+  background: rgba(255,255,255,.08);
+  display:grid; place-items:center; cursor:pointer;
+  background-size: cover; background-position: center;
+}
+.avatar-circle .plus { font-size: 34px; opacity: .7; }
+.avatar-circle.has-img .plus { display: none; }
+
+/* =========================
+   Avatar (navbar)
+   ========================= */
+.avatar-wrap { position: relative; }
+
+.avatar-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 0;
+  background: #374151;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.avatar-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: none; /* hidden until a photo exists */
+}
+
+/* show photo when available, hide initial */
+.avatar-btn.has-photo img { display: block; }
+.avatar-btn.has-photo #avatarInitial { display: none; }
+
+/* =========================
+   Avatar dropdown menu
+   ========================= */
+.menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  min-width: 200px;
+  background: #fff;
+  color: #1f2937;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .12);
+  padding: 8px;
+  display: none;       /* JS toggles to .open */
+  z-index: 2000;
+}
+
+.menu.open { display: block; }
+
+.menu a,
+.menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+
+.menu a:hover,
+.menu button:hover { background: #f3f4f6; }
+
+.menu hr {
+  border: 0;
+  border-top: 1px solid #e5e7eb;
+  margin: 6px 2px;
+}
+
+/* dark theme for menu */
+body.dark .menu {
+  background: #1e1e1e;
+  color: #f5f5f5;
+  border-color: #333;
+}
+body.dark .menu a:hover,
+body.dark .menu button:hover { background: #2a2a2a; }
+
+/* =========================
+   Category dropdown (click-to-open)
+   ========================= */
+.dropdown.open .dropdown-menu { display: flex; }
+
+/* =========================
+   Filters chip + result count
+   ========================= */
+.chip {
+  background: #eef2ff;
+  color: #3730a3;
+  border: 0;
+  padding: 8px 10px;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+}
+
+.result-count {
+  color: #6b7280;
+  font-size: .95rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.result-count .badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #111827;
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+}
+
+/* dark theme for chip + badge */
+body.dark .chip { background: #1f2937; color: #c7d2fe; }
+body.dark .result-count { color: #94a3b8; }
+body.dark .result-count .badge { background: #0b1222; color: #e5e7eb; }
+
+/* =========================
+   Header background fallback
+   ========================= */
+.site-header {
+  background-size: cover;
+  background-position: center;
+}
+
+/* form/readability tweaks */
+.recipe-form label,
+.form-card label { color: #e5e7eb; font-weight: 600; }
+
+.recipe-form input,
+.recipe-form textarea,
+.recipe-form select {
+  background: #1b1f26;
+  color: #f8fafc;
+  border: 1px solid #2d3748;
+  border-radius: 10px;
+  padding: .75rem .85rem;
+}
+
+.recipe-form input:focus,
+.recipe-form textarea:focus,
+.recipe-form select:focus,
+.inpt:focus, .area:focus, .sel:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, .25);
+  outline: none;
+}
+
+.recipe-form .submit-btn { background:#f97316; font-weight:700; }
+.recipe-form .submit-btn:hover { filter: brightness(1.05); }
+
+
+/* ===== Themeable header/footer (overrides) ===== */
+
+/* Header / nav – light */
+.nav-bar{
+  background:#ffffff;
+  color:#1f2937;
+  border-bottom:1px solid #e5e7eb;
+}
+.nav-bar h2,
+.nav-bar a { color:#1f2937; }
+.nav-bar .nav-btn{
+  background:#f97316;
+  color:#111827;
+}
+
+/* Header / nav – dark */
+body.dark .nav-bar{
+  background:#1f1f1f;
+  color:#f5f5f5;
+  border-bottom:1px solid #2b2b2b;
+}
+body.dark .nav-bar h2,
+body.dark .nav-bar a { color:#f5f5f5; }
+
+/* Dropdown button/menu */
+.dropdown-toggle{
+  background:#e5e7eb;      /* light */
+  color:#111827;
+}
+body.dark .dropdown-toggle{
+  background:#334155;      /* dark */
+  color:#ffffff;
+}
+.dropdown-menu{
+  background:#ffffff;      /* light */
+  border:1px solid #e5e7eb;
+}
+body.dark .dropdown-menu{
+  background:#334155;      /* dark */
+  border-color:#2b2b2b;
+}
+
+/* Footer – light */
+.site-footer{
+  background:#f3f4f6;
+  color:#111827;
+  border-top:1px solid #e5e7eb;
+}
+.site-footer a{ color:#2563eb; }
+
+/* Footer – dark */
+body.dark .site-footer{
+  background:#1a1a1a;
+  color:#e5e7eb;
+  border-color:#2b2b2b;
+}
+body.dark .site-footer a{ color:#93c5fd; }
+
+/* Page background so light mode doesn’t look “split” */
+.main-content{ background:#f9fafb; }
+body.dark .main-content{ background:#0f1115; }
+
+/* Result count chip contrast */
+.result-count{ color:#374151; }
+body.dark .result-count{ color:#e5e7eb; }
+
+/* Card shadow subtlety for light */
+.recipe-card{
+  box-shadow: 0 6px 18px rgba(0,0,0,.06);
+}
+body.dark .recipe-card{
+  box-shadow: 0 10px 24px rgba(0,0,0,.35);
 }

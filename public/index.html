@@ -7,169 +7,390 @@
   <title>ChefChecker - Recipe Finder</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="/src/styles.css" />
-  <script src="/src/script.js" defer></script>
+  <!-- keep JS at end of body to avoid blocking -->
 </head>
 
 <body>
-  <!-- HEADER -->
+  <!-- Header -->
   <header class="site-header">
     <nav class="nav-bar">
       <div class="nav-left">
         <a href="index.html" class="logo-link">
           <img src="images/logo.png" alt="Whiskly Logo" class="logo-small" />
         </a>
-
       </div>
 
       <div class="nav-center">
         <div class="search-category-container">
-          <input type="text" id="searchInput" class="search-input"
-            placeholder='Search for recipes (e.g. "Pizza" or "Egg")' />
+          <input
+            type="search"
+            id="searchInput"
+            class="search-input"
+            placeholder='Search for recipes (e.g. "Pizza" or "Egg")'
+            aria-label="Search recipes"
+          />
 
           <div class="dropdown" id="categoryDropdown">
-            <button class="dropdown-toggle">
-              <i class="fas fa-filter"></i> Categories
+            <button class="dropdown-toggle" type="button" aria-haspopup="true" aria-expanded="false">
+              <i class="fas fa-filter"></i> <span id="catLabel">Categories</span>
             </button>
-            <div class="dropdown-menu">
-              <button data-category="" class="dropdown-item">
+            <div class="dropdown-menu" role="menu" aria-label="Categories">
+              <button data-category="" class="dropdown-item" role="menuitem">
                 <i class="fas fa-book-open"></i> All Categories
               </button>
-              <button data-category="breakfast" class="dropdown-item">
+              <button data-category="breakfast" class="dropdown-item" role="menuitem">
                 <i class="fas fa-egg"></i> Breakfast
               </button>
-              <button data-category="lunch" class="dropdown-item">
+              <button data-category="lunch" class="dropdown-item" role="menuitem">
                 <i class="fas fa-utensils"></i> Lunch
               </button>
-              <button data-category="dinner" class="dropdown-item">
+              <button data-category="dinner" class="dropdown-item" role="menuitem">
                 <i class="fas fa-drumstick-bite"></i> Dinner
               </button>
-              <button data-category="desserts" class="dropdown-item">
+              <button data-category="desserts" class="dropdown-item" role="menuitem">
                 <i class="fas fa-ice-cream"></i> Desserts
               </button>
-              <button data-category="vegetarian" class="dropdown-item">
+              <button data-category="vegetarian" class="dropdown-item" role="menuitem">
                 <i class="fas fa-leaf"></i> Vegetarian
               </button>
             </div>
           </div>
+
+          <!-- Clear filters chip -->
+          <button id="clearFilters" class="chip" aria-label="Clear search and category" title="Clear filters" hidden>
+            Clear ✕
+          </button>
+
+          <!-- Result count badge -->
+          <span id="resultCount" class="result-count" aria-live="polite"></span>
         </div>
       </div>
 
       <div class="nav-right" id="navRight">
         <button id="darkToggle" title="Toggle Dark Mode">🌙</button>
-        <!-- Buttons will be injected here -->
       </div>
-
     </nav>
-
-
-
   </header>
 
-  <!-- MAIN CONTENT -->
+  <!-- Main -->
   <main class="main-content">
-    <section id="recipeGrid" class="recipe-grid">
-      <!-- Recipes will load here dynamically -->
-    </section>
+    <section id="recipeGrid" class="recipe-grid"></section>
 
     <div class="pagination">
-      <button disabled>« Prev</button>
-      <button class="active">1</button>
-      <button disabled>Next »</button>
+      <button id="prevBtn">« Prev</button>
+      <span id="pageNum" class="active">1</span>
+      <button id="nextBtn">Next »</button>
     </div>
   </main>
 
-
-  <!-- FOOTER -->
+  <!-- Footer -->
   <footer class="site-footer">
-    <div class="footer-column">
-      <p>Solent University</p>
-      <p>East Park Terrace, Southampton</p>
-      <p>Visitor Counter: <span id="visitorCounter">1423</span></p>
-    </div>
-    <div class="footer-column">
-      <p id="siteIntro">Welcome to our global recipe hub!</p>
-      <label for="langSelect">🌐 Language:</label>
-      <select id="langSelect">
-        <option value="en">English</option>
-        <option value="fr">Français</option>
-        <option value="es">Español</option>
-      </select>
-    </div>
-    <div class="footer-column">
-      <p>Follow us:</p>
-      <a href="#" target="_blank">Twitter</a> |
-      <a href="#" target="_blank">Instagram</a>
+    <div class="footer-inner">
+      <div class="footer-column">
+        <p>Solent University</p>
+        <p>East Park Terrace, Southampton</p>
+        <p>Visitor Counter: <span id="visitorCounter">1423</span></p>
+        <p class="disclaimer">Coursework prototype for COM-710. Not an official Solent service.</p>
+      </div>
+
+      <div class="footer-column">
+        <p id="siteIntro">Welcome to our global recipe hub!</p>
+        <label for="langSelect">🌐 Language:</label>
+        <select id="langSelect">
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="es">Español</option>
+        </select>
+      </div>
+
+      <div class="footer-column">
+        <p>Follow us:</p>
+        <a href="#" target="_blank">Twitter</a> |
+        <a href="#" target="_blank">Instagram</a>
+      </div>
     </div>
   </footer>
 
-
+  <!-- Page logic -->
   <script>
+    // ----- Auth buttons (avatar menu) -----
     const navRight = document.getElementById('navRight');
-    const userId = localStorage.getItem('userId');
+    try {
+      const userId = localStorage.getItem('userId');
+      const authButtons = userId
+        ? `
+            <a href="create.html" class="nav-btn add-recipe">➕ Create Recipe</a>
+            <div class="avatar-wrap" id="accountMenu">
+              <button id="avatarBtn" class="avatar-btn" aria-haspopup="true" aria-expanded="false" title="Account">
+                <img id="avatarImg" alt="" />
+                <span id="avatarInitial">🙂</span>
+              </button>
+              <div id="avatarMenu" class="menu" role="menu" aria-label="Account">
+                <a href="settings.html" role="menuitem"><i class="fa-solid fa-user-gear"></i> Settings</a>
+                <a href="my-recipes.html" role="menuitem"><i class="fa-solid fa-book"></i> My Recipes</a>
+                <hr />
+                <button id="logoutItem" role="menuitem"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+              </div>
+            </div>
+          `
+        : `<a href="login.html" class="nav-btn">🔐 Login</a>`;
+      if (navRight) navRight.insertAdjacentHTML("beforeend", authButtons);
+    } catch (e) {
+      console.warn('LocalStorage not available:', e);
+    }
 
-    const authButtons = userId
-      ? `
-        <a href="create.html" class="nav-btn add-recipe">➕ Add Recipe</a>
-        <button id="logoutBtn" class="nav-btn">Logout</button>
-      `
-      : `
-        <a href="register.html" class="nav-btn">Register</a>
-        <a href="login.html" class="nav-btn">Login</a>
-      `;
+    // ----- Elements & state -----
+    const grid      = document.getElementById('recipeGrid');
+    const qEl       = document.getElementById('searchInput');
+    const dropdown  = document.getElementById('categoryDropdown');
+    const toggleBtn = dropdown.querySelector('.dropdown-toggle');
+    const catLabel  = document.getElementById('catLabel');
+    const prevBtn   = document.getElementById('prevBtn');
+    const nextBtn   = document.getElementById('nextBtn');
+    const pageNum   = document.getElementById('pageNum');
+    const clearBtn  = document.getElementById('clearFilters');
+    const resultEl  = document.getElementById('resultCount');
 
-    if (navRight) navRight.insertAdjacentHTML("beforeend", authButtons);
+    const LIMIT = 12;
+    let currentPage = 1;
+    let currentCategory = '';
+    let currentQuery = '';
+    let totalResults = 0;
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const logoutBtn = document.getElementById('logoutBtn');
-      if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-          localStorage.removeItem('userId');
-          window.location.reload();
-        });
+    // ----- URL <-> state sync -----
+    function readStateFromURL() {
+      const u = new URL(location.href);
+      currentQuery    = u.searchParams.get('q') || '';
+      currentCategory = u.searchParams.get('category') || '';
+      currentPage     = Math.max(1, parseInt(u.searchParams.get('page') || '1', 10));
+
+      qEl.value = currentQuery;
+
+      const items = dropdown.querySelectorAll('.dropdown-item');
+      let activeBtn = null;
+      items.forEach(btn => {
+        const isActive = (btn.dataset.category || '') === currentCategory;
+        btn.classList.toggle('is-active', isActive);
+        if (isActive) { btn.setAttribute('aria-current', 'true'); activeBtn = btn; }
+        else { btn.removeAttribute('aria-current'); }
+      });
+      if (!activeBtn) {
+        const allBtn = dropdown.querySelector('.dropdown-item[data-category=""]');
+        if (allBtn) { allBtn.classList.add('is-active'); allBtn.setAttribute('aria-current','true'); activeBtn = allBtn; }
       }
-    });
+      catLabel.textContent = activeBtn ? activeBtn.textContent.trim() : 'Categories';
 
-    async function loadRecipe() {
-      const params = new URLSearchParams(window.location.search);
-      const recipeId = params.get("id");
+      updateClearVisibility();
+    }
 
-      if (!recipeId) {
-        const el = document.getElementById("recipeDetails");
-        if (el) el.innerHTML = '<p>No recipe selected.</p>';
-        return;
-      }
+    function writeStateToURL() {
+      const u = new URL(location.href);
+      if (currentQuery) u.searchParams.set('q', currentQuery); else u.searchParams.delete('q');
+      if (currentCategory) u.searchParams.set('category', currentCategory); else u.searchParams.delete('category');
+      if (currentPage > 1) u.searchParams.set('page', String(currentPage)); else u.searchParams.delete('page');
+      history.replaceState(null, '', u.toString());
+      updateClearVisibility();
+    }
+
+    function updateClearVisibility() {
+      clearBtn.hidden = !(currentQuery || currentCategory);
+    }
+
+    function updateResultCount(visibleCount) {
+      if (!totalResults && !visibleCount) { resultEl.textContent = ''; return; }
+      const start = (currentPage - 1) * LIMIT + (visibleCount ? 1 : 0);
+      const end   = (currentPage - 1) * LIMIT + visibleCount;
+      resultEl.innerHTML = totalResults
+        ? `<span class="badge">${totalResults}</span> result${totalResults === 1 ? '' : 's'} · showing ${start}-${end}`
+        : `<span class="badge">${visibleCount}</span> result${visibleCount === 1 ? '' : 's'}`;
+    }
+
+    // ----- Load & render -----
+    async function load(page = 1) {
+      currentPage = page;
+      currentQuery = (qEl?.value || '').trim();
 
       try {
-        const res = await fetch(`/api/recipes/${recipeId}`);
-        const recipe = await res.json();
+        const url = new URL('/api/recipes', location.origin);
+        if (currentQuery)    url.searchParams.set('q', currentQuery);
+        if (currentCategory) url.searchParams.set('category', currentCategory);
+        url.searchParams.set('page', currentPage);
+        url.searchParams.set('limit', LIMIT);
+        url.searchParams.set('meta', '1');
 
-        if (!res.ok) {
-          throw new Error(recipe.error || 'Failed to load recipe');
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`API ${res.status}`);
+
+        const data = await res.json();
+        const list = Array.isArray(data) ? data : (data.items || []);
+        totalResults = Array.isArray(data) ? 0 : (data.total ?? 0);
+
+        grid.innerHTML = list.length
+          ? list.map(r => `
+              <article class="recipe-card" tabindex="0" role="button" aria-label="Open ${r.title}">
+                <img src="${r.image || 'images/placeholder.jpg'}" alt="${r.title}" />
+                <h3>${r.title}</h3>
+              </article>
+            `).join('')
+          : '<p style="opacity:.7">No recipes found.</p>';
+
+        if (list.length) {
+          Array.from(grid.children).forEach((card, i) => {
+            const id = list[i].id;
+            card.addEventListener('click', () => location.href = `recipe.html?id=${id}`);
+            card.addEventListener('keydown', (e) => { if (e.key === 'Enter') location.href = `recipe.html?id=${id}`; });
+          });
         }
 
-        const el = document.getElementById("recipeDetails");
-        if (el) {
-          el.innerHTML = `
-          <h2>${recipe.title}</h2>
-          <img src="${recipe.image || 'https://via.placeholder.com/400'}" alt="${recipe.title}" style="max-width: 100%; border-radius: 8px;" />
-          <h3>Ingredients</h3>
-          <p>${recipe.ingredients || 'N/A'}</p>
-          <h3>Instructions</h3>
-          <p>${recipe.instructions || 'N/A'}</p>
-        `;
+        if (totalResults) {
+          const maxPage = Math.max(1, Math.ceil(totalResults / LIMIT));
+          prevBtn.disabled = currentPage <= 1;
+          nextBtn.disabled = currentPage >= maxPage;
+        } else {
+          prevBtn.disabled = currentPage === 1;
+          nextBtn.disabled = list.length < LIMIT;
         }
+        pageNum.textContent = currentPage;
+
+        updateResultCount(list.length);
+        writeStateToURL();
       } catch (err) {
-        const el = document.getElementById("recipeDetails");
-        if (el) el.innerHTML = `<p>Error: ${err.message}</p>`;
+        console.error('Load error:', err);
+        grid.innerHTML = `<p style="opacity:.7">Failed to load recipes.</p>`;
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        resultEl.textContent = '';
       }
     }
 
-    loadRecipe();
+    // ----- Events -----
+    qEl?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); load(1); }
+    });
+
+    // dropdown open/close
+    toggleBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      const isOpen = dropdown.classList.toggle('open');
+      toggleBtn.setAttribute('aria-expanded', String(isOpen));
+    });
+    document.addEventListener('click', (e) => {
+      if (!dropdown.contains(e.target)) {
+        dropdown.classList.remove('open');
+        toggleBtn?.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    // category clicks + active mark
+    dropdown?.querySelectorAll('.dropdown-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        dropdown.querySelectorAll('.dropdown-item').forEach(x => {
+          x.classList.remove('is-active'); x.removeAttribute('aria-current');
+        });
+        btn.classList.add('is-active'); btn.setAttribute('aria-current','true');
+
+        currentCategory = btn.dataset.category || '';
+        catLabel.textContent = btn.textContent.trim() || 'Categories';
+        load(1);
+
+        dropdown.classList.remove('open');
+        toggleBtn?.setAttribute('aria-expanded','false');
+      });
+    });
+
+    // pagination
+    prevBtn.addEventListener('click', () => { if (currentPage > 1) load(currentPage - 1); });
+    nextBtn.addEventListener('click', () => { load(currentPage + 1); });
+
+    // clear filters
+    clearBtn.addEventListener('click', () => {
+      qEl.value = '';
+      currentQuery = '';
+      currentCategory = '';
+
+      const allBtn = dropdown.querySelector('.dropdown-item[data-category=""]');
+      dropdown.querySelectorAll('.dropdown-item').forEach(x => {
+        x.classList.remove('is-active'); x.removeAttribute('aria-current');
+      });
+      if (allBtn) {
+        allBtn.classList.add('is-active'); allBtn.setAttribute('aria-current','true');
+        catLabel.textContent = allBtn.textContent.trim() || 'Categories';
+      } else {
+        catLabel.textContent = 'Categories';
+      }
+      load(1);
+    });
+
+    // initial
+    document.addEventListener('DOMContentLoaded', () => {
+      readStateFromURL();
+      load(currentPage);
+    });
+
+    // ----- Avatar menu -----
+    (function () {
+      const btn   = document.getElementById('avatarBtn');
+      const img   = document.getElementById('avatarImg');
+      const init  = document.getElementById('avatarInitial');
+      const menu  = document.getElementById('avatarMenu');
+      const wrap  = document.getElementById('accountMenu');
+      if (!btn || !menu || !wrap || !img || !init) return;
+
+      try {
+        const name = (localStorage.getItem('username') || localStorage.getItem('email') || 'User').trim();
+        const avatar = localStorage.getItem('avatar') || '';
+        if (avatar) {
+          img.src = avatar;
+          btn.classList.add('has-photo');
+        } else {
+          init.textContent = (name[0] || 'U').toUpperCase();
+          btn.classList.remove('has-photo');
+          img.removeAttribute('src');
+        }
+      } catch {
+        init.textContent = 'U';
+      }
+
+      function openMenu(open) { menu.classList.toggle('open', open); btn.setAttribute('aria-expanded', String(open)); }
+
+      btn.addEventListener('click', (e) => { e.stopPropagation(); openMenu(!menu.classList.contains('open')); });
+      document.addEventListener('click', (e) => { if (!wrap.contains(e.target)) openMenu(false); });
+      btn.addEventListener('keydown', (e) => { if (e.key === 'Escape') openMenu(false); });
+
+      document.getElementById('logoutItem')?.addEventListener('click', () => {
+        try { ['userId','username','email','avatar'].forEach(k => localStorage.removeItem(k)); } catch {}
+        location.href = 'index.html';
+      });
+    })();
+
+    // ----- Dark mode -----
+    (function () {
+      const btn = document.getElementById('darkToggle');
+      if (!btn) return;
+
+      const KEY = 'theme';
+      let theme = null;
+      try { theme = localStorage.getItem(KEY); } catch {}
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark' : 'light';
+      }
+
+      function apply(t) {
+        document.body.classList.toggle('dark', t === 'dark');
+        const isDark = t === 'dark';
+        btn.textContent = isDark ? '☀️' : '🌙';
+        btn.title = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+      }
+
+      apply(theme);
+
+      btn.addEventListener('click', () => {
+        const newTheme = document.body.classList.contains('dark') ? 'light' : 'dark';
+        apply(newTheme);
+        try { localStorage.setItem(KEY, newTheme); } catch {}
+      });
+    })();
   </script>
-
-
-
-
 </body>
-
 </html>

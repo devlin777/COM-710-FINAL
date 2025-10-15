@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Recipes • ChefChecker</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="/src/styles.css" />
+</head>
+<body>
+  <!-- header -->
+  <header class="site-header">
+    <nav class="nav-bar">
+      <div class="nav-left">
+        <a href="index.html" class="logo-link">
+          <img src="images/logo.png" alt="Whiskly Logo" class="logo-small" />
+        </a>
+      </div>
+
+      <div class="nav-center">
+        <h2 style="color:#fff">My Recipes</h2>
+      </div>
+
+      <div class="nav-right" id="navRight">
+        <button id="darkToggle" title="Toggle Dark Mode">🌙</button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- main -->
+  <main class="main-content">
+    <section id="recipeGrid" class="recipe-grid"></section>
+
+    <div class="pagination">
+      <button id="prevBtn">« Prev</button>
+      <span id="pageNum" class="active">1</span>
+      <button id="nextBtn">Next »</button>
+    </div>
+  </main>
+
+  <!-- footer -->
+  <footer class="site-footer">
+    <div class="footer-column">
+      <p>Solent University</p>
+      <p>East Park Terrace, Southampton</p>
+      <p>Visitor Counter: <span id="visitorCounter">1423</span></p>
+    </div>
+    <div class="footer-column">
+      <p id="siteIntro">Welcome to our global recipe hub!</p>
+      <label for="langSelect">🌐 Language:</label>
+      <select id="langSelect">
+        <option value="en">English</option>
+        <option value="fr">Français</option>
+        <option value="es">Español</option>
+      </select>
+    </div>
+    <div class="footer-column">
+      <p>Follow us:</p>
+      <a href="#" target="_blank">Twitter</a> |
+      <a href="#" target="_blank">Instagram</a>
+    </div>
+  </footer>
+
+  <script>
+    // auth buttons + avatar
+    (function () {
+      const navRight = document.getElementById('navRight');
+      const userId = localStorage.getItem('userId');
+      const html = userId
+        ? `
+          <a href="create.html" class="nav-btn add-recipe">➕ Create Recipe</a>
+          <div class="avatar-wrap" id="accountMenu">
+            <button id="avatarBtn" class="avatar-btn" aria-haspopup="true" aria-expanded="false" title="Account">
+              <img id="avatarImg" alt="" />
+              <span id="avatarInitial">🙂</span>
+            </button>
+            <div id="avatarMenu" class="menu" role="menu" aria-label="Account">
+              <a href="settings.html" role="menuitem"><i class="fa-solid fa-user-gear"></i> Settings</a>
+              <a href="my-recipes.html" role="menuitem"><i class="fa-solid fa-book"></i> My Recipes</a>
+              <hr />
+              <button id="logoutItem" role="menuitem"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+            </div>
+          </div>`
+        : `<a href="login.html" class="nav-btn">🔐 Login</a>`;
+      navRight.insertAdjacentHTML('beforeend', html);
+
+      const btn = document.getElementById('avatarBtn');
+      const img = document.getElementById('avatarImg');
+      const init = document.getElementById('avatarInitial');
+      const menu = document.getElementById('avatarMenu');
+      const wrap = document.getElementById('accountMenu');
+
+      if (btn && img && init && menu && wrap) {
+        try {
+          const name = (localStorage.getItem('username') || localStorage.getItem('email') || 'User').trim();
+          const avatar = localStorage.getItem('avatar') || '';
+          if (avatar) { img.src = avatar; btn.classList.add('has-photo'); }
+          else { init.textContent = (name[0] || 'U').toUpperCase(); btn.classList.remove('has-photo'); img.removeAttribute('src'); }
+        } catch { init.textContent = 'U'; }
+
+        btn.addEventListener('click', (e) => { e.stopPropagation(); menu.classList.toggle('open'); btn.setAttribute('aria-expanded', String(menu.classList.contains('open'))); });
+        document.addEventListener('click', (e) => { if (!wrap.contains(e.target)) { menu.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); } });
+        document.getElementById('logoutItem')?.addEventListener('click', () => {
+          ['userId','username','email','avatar'].forEach(k => localStorage.removeItem(k));
+          location.href = 'index.html';
+        });
+      }
+    })();
+
+    // dark mode
+    (function () {
+      const btn = document.getElementById('darkToggle');
+      const KEY = 'theme';
+      let theme = null;
+      try { theme = localStorage.getItem(KEY); } catch {}
+      if (!theme) theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      function apply(t){ document.body.classList.toggle('dark', t==='dark'); btn.textContent = t==='dark' ? '☀️' : '🌙'; }
+      apply(theme);
+      btn.addEventListener('click', () => { const nt = document.body.classList.contains('dark') ? 'light' : 'dark'; apply(nt); try{ localStorage.setItem(KEY, nt);}catch{} });
+    })();
+
+    // my recipes data + UI
+    const grid    = document.getElementById('recipeGrid');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const pageNum = document.getElementById('pageNum');
+
+    const LIMIT = 12;
+    let currentPage = 1;
+    let total = 0;
+
+    async function load(page = 1) {
+      const uid = localStorage.getItem('userId');
+      if (!uid) {
+        grid.innerHTML = `<p style="opacity:.8">Please <a href="login.html">log in</a> to view your recipes.</p>`;
+        prevBtn.disabled = nextBtn.disabled = true;
+        return;
+      }
+
+      currentPage = page;
+
+      try {
+        const url = new URL('/api/recipes/mine', location.origin);
+        url.searchParams.set('user_id', uid);
+        url.searchParams.set('page', currentPage);
+        url.searchParams.set('limit', LIMIT);
+        url.searchParams.set('meta', '1');
+
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`API ${res.status}`);
+        const data = await res.json();
+        const list = data.items || [];
+        total = data.total || list.length;
+
+        grid.innerHTML = list.length
+          ? list.map(r => `
+              <article class="recipe-card" aria-label="${r.title}">
+                <img src="${r.image || 'images/placeholder.jpg'}" alt="${r.title}" />
+                <h3>${r.title}</h3>
+                <div style="display:flex;gap:.5rem;justify-content:center;margin-top:.5rem">
+                  <a class="nav-btn" style="background:#6366f1;color:#fff;padding:.35rem .6rem" href="edit.html?id=${r.id}"><i class="fa fa-pen"></i> Edit</a>
+                  <button class="nav-btn del-btn" data-id="${r.id}" style="background:#ef4444;color:#fff;padding:.35rem .6rem"><i class="fa fa-trash"></i> Delete</button>
+                </div>
+              </article>
+            `).join('')
+          : '<p style="opacity:.7">You have no recipes yet. <a href="create.html">Create one</a>.</p>';
+
+        // card click → details
+        Array.from(grid.querySelectorAll('.recipe-card')).forEach((card, i) => {
+          const id = (data.items || [])[i]?.id;
+          if (!id) return;
+          card.addEventListener('click', (e) => {
+            if (e.target.closest('.del-btn') || e.target.closest('a')) return; // ignore when clicking action buttons
+            location.href = `recipe.html?id=${id}`;
+          });
+        });
+
+        // delete handlers
+        grid.querySelectorAll('.del-btn').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const id = btn.dataset.id;
+            if (!confirm('Delete this recipe?')) return;
+            const resDel = await fetch(`/api/recipes/${id}?user_id=${uid}`, { method: 'DELETE' });
+            const d = await resDel.json().catch(()=>({}));
+            if (!resDel.ok) return alert(d.error || 'Delete failed');
+            load(currentPage); // refresh
+          });
+        });
+
+        const maxPage = Math.max(1, Math.ceil(total / LIMIT));
+        prevBtn.disabled = currentPage <= 1;
+        nextBtn.disabled = currentPage >= maxPage;
+        pageNum.textContent = currentPage;
+      } catch (err) {
+        console.error(err);
+        grid.innerHTML = `<p style="opacity:.8">Failed to load your recipes.</p>`;
+        prevBtn.disabled = nextBtn.disabled = true;
+      }
+    }
+
+    prevBtn.addEventListener('click', () => { if (currentPage > 1) load(currentPage - 1); });
+    nextBtn.addEventListener('click', () => { load(currentPage + 1); });
+
+    document.addEventListener('DOMContentLoaded', () => load(1));
+  </script>
+</body>
+</html>

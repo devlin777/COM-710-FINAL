@@ -1,0 +1,14 @@
+# dependencies
+node_modules/
+
+# uploads & db
+public/uploads/
+database.db
+
+# coverage & env
+coverage/
+.env
+
+# OS/editor cruft
+.DS_Store
+Thumbs.db

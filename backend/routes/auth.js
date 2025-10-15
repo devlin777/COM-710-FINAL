@@ -1,36 +1,37 @@
+// backend/routes/auth.js
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcrypt');
-const db = require('../../config/db'); 
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
+const ctrl = require('../controllers/authController');
 
-
-// Register
-router.post('/register', async (req, res) => {
-  const { username, email, password } = req.body;
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  const stmt = db.prepare('INSERT INTO users (username, email, password) VALUES (?, ?, ?)');
-  try {
-    stmt.run(username, email, hashedPassword);
-    res.status(201).json({ message: 'User registered successfully' });
-  } catch (err) {
-    res.status(400).json({ error: 'Email already used or bad input' });
+// avatar uploads
+const uploadsDir = path.join(__dirname, '../../public/uploads');
+fs.mkdirSync(uploadsDir, { recursive: true });
+const storage = multer.diskStorage({
+  destination: (_, __, cb) => cb(null, uploadsDir),
+  filename: (_, file, cb) => {
+    const ext = path.extname(file.originalname || '').toLowerCase();
+    cb(null, `${Date.now()}-${Math.floor(Math.random() * 10000)}${ext}`);
+  }
+});
+// allow only images up to ~3MB
+const upload = multer({
+  storage,
+  limits: { fileSize: 3 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const ok = /image\/(png|jpeg|jpg|webp|gif)/.test(file.mimetype || '');
+    cb(ok ? null : new Error('Only PNG/JPG/WEBP/GIF images allowed (max ~3MB)'), ok);
   }
 });
 
-// Login
-router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+// auth
+router.post('/register', ctrl.register);
+router.post('/login', ctrl.login);
 
-  db.get('SELECT * FROM users WHERE email = ?', [email], async (err, user) => {
-    if (err) return res.status(500).json({ error: 'Database error' });
-    if (!user) return res.status(404).json({ error: 'User not found' });
-
-    const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(401).json({ error: 'Incorrect password' });
-
-    res.json({ userId: user.id });
-  });
-});
+// profile
+router.get('/me/:id', ctrl.me);
+router.post('/me/:id', upload.single('avatar'), ctrl.updateMe);
 
 module.exports = router;

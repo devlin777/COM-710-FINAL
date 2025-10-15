@@ -3,39 +3,51 @@
 <head>
   <meta charset="UTF-8" />
   <title>Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="/src/styles.css" />
 </head>
 <body>
   <div class="auth-container">
     <h2>Login</h2>
-    <form id="loginForm">
-      <input type="email" id="email" placeholder="Email" required />
-      <input type="password" id="password" placeholder="Password" required />
-      <button type="submit">Login</button>
+
+    <!-- error message -->
+    <p id="loginError" class="form-error" role="alert" style="display:none;"></p>
+
+    <form id="loginForm" novalidate>
+      <!-- email -->
+      <input
+        id="email"
+        name="email"
+        type="email"
+        inputmode="email"
+        placeholder="Email"
+        autocomplete="email"
+        required
+        maxlength="120"
+      />
+
+      <!-- password + show toggle -->
+      <div class="password-field">
+        <input
+          id="password"
+          name="password"
+          type="password"
+          placeholder="Password"
+          autocomplete="current-password"
+          required
+          minlength="8"
+          maxlength="72"
+        />
+        <button type="button" id="togglePwd" class="btn-ghost" aria-label="Show password">👁</button>
+      </div>
+
+      <button id="loginBtn" type="submit">Login</button>
     </form>
-    <p>Don't have an account? <a href="register.html">Register</a></p>
+
+    <p class="auth-alt">Don't have an account? <a href="register.html">Register</a></p>
   </div>
 
-  <script>
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        localStorage.setItem('userId', data.userId);
-        window.location.href = '/index.html';
-      } else {
-        alert(data.error || 'Login failed');
-      }
-    });
-  </script>
+  <!-- page script -->
+  <script src="/src/login.js" defer></script>
 </body>
 </html>

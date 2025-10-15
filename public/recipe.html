@@ -5,7 +5,7 @@
   <title>Recipe Details</title>
   <link rel="stylesheet" href="/src/styles.css" />
 </head>
-<body>
+<body class="recipe-detail">
   <header class="site-header">
     <nav class="nav-bar">
       <div class="nav-left">
@@ -22,79 +22,193 @@
     </nav>
   </header>
 
-  <main class="main-content">
-    <div id="recipeDetails" class="recipe-details">
-      <p>Loading...</p>
-    </div>
+  <main class="rd-container">
+    <article>
+      <img id="recipe-image" class="rd-hero" alt="Recipe image" />
+      <h1 id="recipe-title" class="rd-title"></h1>
+      <div id="recipe-meta" class="rd-meta"></div>
 
-    <!-- Like / Favorite -->
-    <div class="recipe-actions" style="margin-top: 20px;">
-      <button id="likeBtn">❤️ Like</button>
-      <button id="favBtn">⭐ Favorite</button>
-      <span id="favCount"></span>
-    </div>
+      <!-- Actions (now includes owner Edit/Delete) -->
+      <div class="rd-actions">
+        <button id="likeBtn">❤️ Like</button>
+        <button id="favBtn">⭐ Favorite</button>
+        <span id="favCount" class="pill">Favorited by 0 users</span>
+        <span style="flex:1"></span>
+        <a id="editRecipeBtn" class="rd-btn" style="display:none">Edit</a>
+        <button id="deleteRecipeBtn" class="rd-btn" style="display:none;background:#ef4444;color:#fff">Delete</button>
+      </div>
 
-    <!-- Comments -->
-    <div class="comments-section" style="margin-top: 40px;">
-      <h3>Comments</h3>
-      <div id="commentsList">Loading comments...</div>
+      <section class="rd-grid">
+        <div class="rd-panel">
+          <h3>Ingredients</h3>
+          <ul id="ingredients-list" class="rd-bullets"></ul>
+        </div>
+        <div class="rd-panel">
+          <h3>Instructions</h3>
+          <ol id="instructions-list" class="rd-steps"></ol>
+        </div>
+      </section>
 
-      <form id="commentForm" style="margin-top: 15px;">
-        <textarea id="commentInput" rows="3" placeholder="Add a comment..." required></textarea><br />
-        <button type="submit">Post Comment</button>
-      </form>
-    </div>
+      <section class="rd-panel rd-comments">
+        <h3>Comments</h3>
+        <ul id="commentsList" class="rd-comments-list">
+          <li class="rd-muted">Loading comments…</li>
+        </ul>
+
+        <form id="commentForm" class="rd-cform">
+          <textarea id="commentInput" rows="3" placeholder="Add a comment..." required></textarea>
+          <button type="submit" class="rd-btn">Add Comment</button>
+        </form>
+      </section>
+    </article>
   </main>
 
   <script>
     const params = new URLSearchParams(window.location.search);
     const recipeId = params.get('id');
-    const userId = localStorage.getItem('userId');
+    const userId = localStorage.getItem('userId');      // used for favorite + comments
+    const me = userId;                                   // used for owner checks
+
+    const li = (t) => `<li>${t}</li>`;
 
     async function loadRecipe() {
       if (!recipeId) {
-        document.getElementById('recipeDetails').innerHTML = '<p>No recipe ID found in URL.</p>';
+        document.querySelector('.rd-container').innerHTML = '<p style="padding:2rem">No recipe ID found.</p>';
         return;
       }
-
       try {
         const res = await fetch(`/api/recipes/${recipeId}`);
-        const recipe = await res.json();
+        const r = await res.json();
+        if (!res.ok) throw new Error(r.error || 'Failed to load recipe');
 
-        if (!res.ok) throw new Error(recipe.error || 'Failed to load recipe');
+        // Hero + title + meta
+        document.getElementById('recipe-image').src = r.image || 'images/placeholder.jpg';
+        document.getElementById('recipe-image').alt = r.title || 'Recipe image';
+        document.getElementById('recipe-title').textContent = r.title || 'Untitled';
 
-        document.getElementById('recipeDetails').innerHTML = `
-          <h2>${recipe.title}</h2>
-          <img src="${recipe.image || 'https://via.placeholder.com/400'}" alt="${recipe.title}" style="max-width: 100%; border-radius: 8px;" />
-          <h3>Ingredients</h3>
-          <p>${recipe.ingredients || 'N/A'}</p>
-          <h3>Instructions</h3>
-          <p>${recipe.instructions || 'N/A'}</p>
-        `;
+        const metaBits = [
+          r.category ? `Category: ${r.category}` : null,
+          r.visibility ? `Visibility: ${r.visibility}` : null,
+          r.created_at ? new Date(r.created_at).toLocaleString() : null
+        ].filter(Boolean);
+        document.getElementById('recipe-meta').textContent = metaBits.join(' • ');
+
+        // Ingredients → bullets
+        const ingredients = (r.ingredients || '')
+          .split(/\r?\n|•|;|,/).map(s => s.trim()).filter(Boolean);
+        document.getElementById('ingredients-list').innerHTML =
+          ingredients.length ? ingredients.map(li).join('') : '<li>No ingredients listed.</li>';
+
+        // Instructions → numbered steps
+        const byLines = (r.instructions || '')
+          .split(/\r?\n+/).map(s => s.replace(/^\d+\.\s*/, '').trim()).filter(Boolean);
+        const steps = byLines.length ? byLines
+          : (r.instructions || '').split(/(?<=\.)\s+/).map(s => s.trim()).filter(Boolean);
+        document.getElementById('instructions-list').innerHTML =
+          steps.length ? steps.map(li).join('') : '<li>No instructions provided.</li>';
+
+        // --- owner actions (show Edit/Delete if I own it) ---
+        const isOwner = me && (+me === +r.user_id);
+        const editBtn = document.getElementById('editRecipeBtn');
+        const delBtn  = document.getElementById('deleteRecipeBtn');
+        editBtn.style.display = isOwner ? 'inline-block' : 'none';
+        delBtn.style.display  = isOwner ? 'inline-block' : 'none';
+        editBtn.href = `edit.html?id=${recipeId}`;
+        delBtn.onclick = async () => {
+          if (!confirm('Delete this recipe?')) return;
+          const resDel = await fetch(`/api/recipes/${recipeId}?user_id=${me}`, { method: 'DELETE' });
+          const dataDel = await resDel.json();
+          if (!resDel.ok) return alert(dataDel.error || 'Delete failed');
+          location.href = 'my-recipes.html';
+        };
+
+        await loadFavorites();
+        await loadComments();
       } catch (err) {
-        document.getElementById('recipeDetails').innerHTML = `<p>Error: ${err.message}</p>`;
+        document.querySelector('.rd-container').innerHTML = `<p style="padding:2rem">Error: ${err.message}</p>`;
       }
     }
 
     async function loadFavorites() {
       const res = await fetch(`/api/recipes/${recipeId}/favorites`);
-      const data = await res.json();
-      document.getElementById('favCount').textContent = `⭐ Favorited by ${data.count} users`;
+      const data = res.ok ? await res.json() : { count: 0 };
+      document.getElementById('favCount').textContent =
+        `Favorited by ${data.count} user${data.count == 1 ? '' : 's'}`;
     }
 
+    // List + enable Edit/Delete for my own comments
     async function loadComments() {
       const res = await fetch(`/api/recipes/${recipeId}/comments`);
-      const comments = await res.json();
+      const comments = res.ok ? await res.json() : [];
       const list = document.getElementById('commentsList');
-      list.innerHTML = comments.length
-        ? comments.map(c => `<p><strong>${c.username}:</strong> ${c.content}</p>`).join('')
-        : '<p>No comments yet.</p>';
+
+      if (!comments.length) {
+        list.innerHTML = '<li class="rd-muted">No comments yet.</li>';
+        return;
+      }
+      list.innerHTML = comments.map(c => {
+        const name = c.username || 'User';
+        const initial = name[0]?.toUpperCase() || 'U';
+        const when = c.created_at ? new Date(c.created_at).toLocaleString() : '';
+        const mine = me && (+me === +c.user_id);
+        return `
+          <li class="rd-comment" data-id="${c.id}">
+            <div class="rd-avatar">${initial}</div>
+            <div class="rd-cbody">
+              <div class="rd-cmeta"><strong>${name}</strong> · <time>${when}</time></div>
+              <p class="c-text">${c.content}</p>
+              ${mine ? `
+                <div style="display:flex;gap:.5rem;margin-top:.35rem">
+                  <button class="rd-btn c-edit" style="padding:.25rem .6rem">Edit</button>
+                  <button class="rd-btn c-del"  style="padding:.25rem .6rem;background:#ef4444;color:#fff">Delete</button>
+                </div>` : ``}
+            </div>
+          </li>
+        `;
+      }).join('');
+
+      // Wire up edit/delete for my comments
+      list.querySelectorAll('.c-edit').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const item = btn.closest('.rd-comment');
+          const id = item.dataset.id;
+          const p = item.querySelector('.c-text');
+          const newText = prompt('Edit comment:', p.textContent.trim());
+          if (newText == null) return;
+          const resU = await fetch(`/api/recipes/comments/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content: newText, userId: me })
+          });
+          const d = await resU.json();
+          if (!resU.ok) return alert(d.error || 'Update failed');
+          loadComments();
+        });
+      });
+
+      list.querySelectorAll('.c-del').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('Delete this comment?')) return;
+          const item = btn.closest('.rd-comment');
+          const id = item.dataset.id;
+          const resD = await fetch(`/api/recipes/comments/${id}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: me })
+          });
+          const d = await resD.json();
+          if (!resD.ok) return alert(d.error || 'Delete failed');
+          loadComments();
+        });
+      });
     }
 
+    // Like (placeholder)
     document.getElementById('likeBtn').addEventListener('click', () => {
       alert('❤️ Like clicked (optional feature)');
     });
 
+    // Favorite
     document.getElementById('favBtn').addEventListener('click', async () => {
       if (!userId) return alert('Please login to favorite');
       const res = await fetch(`/api/recipes/${recipeId}/favorite`, {
@@ -102,11 +216,12 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId })
       });
-      const data = await res.json();
-      alert(data.message || 'Favorited');
-      loadFavorites();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) return alert(data.error || 'Failed to favorite');
+      await loadFavorites();
     });
 
+    // Add new comment
     document.getElementById('commentForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const content = document.getElementById('commentInput').value.trim();
@@ -119,18 +234,14 @@
         body: JSON.stringify({ content, userId })
       });
 
-      const data = await res.json();
-      if (res.ok) {
-        document.getElementById('commentInput').value = '';
-        loadComments();
-      } else {
-        alert(data.error || 'Failed to post comment');
-      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) return alert(data.error || 'Failed to post comment');
+
+      document.getElementById('commentInput').value = '';
+      loadComments();
     });
 
     loadRecipe();
-    loadFavorites();
-    loadComments();
   </script>
 </body>
 </html>

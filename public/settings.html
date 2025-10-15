@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Settings</title>
+  <link rel="stylesheet" href="/src/styles.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body class="dark">
+  <header class="site-header">
+    <nav class="nav-bar">
+      <div class="nav-left">
+        <a href="index.html" class="logo-link">
+          <img src="images/logo.png" alt="Whiskly Logo" class="logo-small" />
+        </a>
+      </div>
+      <div class="nav-center">
+        <h2>Settings</h2>
+      </div>
+      <div class="nav-right" id="navRight">
+        <button id="darkToggle" title="Toggle Dark Mode">🌙</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="settings-wrap">
+    <form id="settingsForm" class="settings-card" enctype="multipart/form-data">
+      <h2 class="settings-title">Settings</h2>
+
+      <section class="fieldset">
+        <div class="fieldset-head">Account</div>
+
+        <div class="row">
+          <div class="col">
+            <label for="username">Name</label>
+            <input id="username" name="username" type="text" placeholder="Your name" required />
+          </div>
+
+          <div class="col avatar-col">
+            <div class="avatar-circle" id="avatarPreview">
+              <span class="plus">+</span>
+            </div>
+            <input id="avatarFile" name="avatar" type="file" accept="image/*" hidden />
+            <button type="button" id="avatarPick" class="ghost-btn">Change</button>
+          </div>
+        </div>
+
+        <label for="bio">Bio</label>
+        <textarea id="bio" name="bio" rows="4" placeholder="Tell us about you…"></textarea>
+      </section>
+
+      <hr class="divider"/>
+
+      <section class="fieldset">
+        <div class="fieldset-head">Email and Password</div>
+
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" disabled />
+
+        <label for="password">Password <small class="muted">(leave blank to keep current)</small></label>
+        <div class="password-wrap">
+          <input id="password" name="password" type="password" placeholder="New password (optional)"/>
+          <button type="button" id="reveal" class="eye"><i class="fa-regular fa-eye"></i></button>
+        </div>
+
+        <button type="submit" class="cta">Save Changes</button>
+      </section>
+
+      <hr class="divider"/>
+
+      <div class="actions">
+        <a href="index.html" class="ghost-btn">Back</a>
+        <button type="button" id="logoutBtn" class="danger">Log Out</button>
+      </div>
+    </form>
+  </main>
+
+  <script>
+    // Dark mode quick enable (same as index)
+    (function () {
+      const btn = document.getElementById('darkToggle'); if(!btn) return;
+      const KEY = 'theme'; let t = localStorage.getItem(KEY);
+      if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      apply(t); btn.addEventListener('click', () => { const n = document.body.classList.contains('dark')?'light':'dark'; apply(n); localStorage.setItem(KEY,n); });
+      function apply(x){ document.body.classList.toggle('dark', x==='dark'); btn.textContent = x==='dark'?'☀️':'🌙'; }
+    })();
+
+    const userId = +localStorage.getItem('userId') || 0;
+    if (!userId) location.href = 'login.html';
+
+    const usernameEl = document.getElementById('username');
+    const bioEl      = document.getElementById('bio');
+    const emailEl    = document.getElementById('email');
+    const passEl     = document.getElementById('password');
+    const formEl     = document.getElementById('settingsForm');
+
+    const avatarPreview = document.getElementById('avatarPreview');
+    const avatarFile    = document.getElementById('avatarFile');
+    const avatarPick    = document.getElementById('avatarPick');
+
+    // Load current profile
+    async function loadMe() {
+      const res = await fetch(`/api/auth/me/${userId}`);
+      if (!res.ok) return alert('Failed to load profile');
+      const me = await res.json();
+      usernameEl.value = me.username || '';
+      bioEl.value      = me.bio || '';
+      emailEl.value    = me.email || '';
+      if (me.avatar) {
+        avatarPreview.style.backgroundImage = `url('${me.avatar}')`;
+        avatarPreview.classList.add('has-img');
+      }
+      // Store for navbar initial (optional)
+      localStorage.setItem('username', me.username || '');
+      localStorage.setItem('email', me.email || '');
+    }
+
+    // Avatar chooser
+    avatarPick.addEventListener('click', () => avatarFile.click());
+    avatarPreview.addEventListener('click', () => avatarFile.click());
+    avatarFile.addEventListener('change', () => {
+      const f = avatarFile.files?.[0];
+      if (!f) return;
+      const url = URL.createObjectURL(f);
+      avatarPreview.style.backgroundImage = `url('${url}')`;
+      avatarPreview.classList.add('has-img');
+    });
+
+    // Reveal password
+    document.getElementById('reveal').addEventListener('click', () => {
+      passEl.type = passEl.type === 'password' ? 'text' : 'password';
+    });
+
+    // Save changes
+    formEl.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(formEl); // username, bio, password?, avatar?
+      try {
+        const res = await fetch(`/api/auth/me/${userId}`, { method: 'POST', body: fd });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) return alert(data.error || 'Failed to update');
+        alert('Profile updated');
+        if (fd.get('password')) passEl.value = ''; // clear
+      } catch (err) {
+        alert('Network error updating profile');
+      }
+    });
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('userId');
+      localStorage.removeItem('username');
+      localStorage.removeItem('email');
+      location.href = 'index.html';
+    });
+
+    loadMe();
+  </script>
+</body>
+</html>
