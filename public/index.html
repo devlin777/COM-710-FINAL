@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ChefChecker - Recipe Finder</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="/src/styles.css" />
-  <!-- keep JS at end of body to avoid blocking -->
+  <link rel="icon" type="image/png" href="/images/logo.png" />
+
 </head>
 
 <body>
@@ -56,12 +56,10 @@
             </div>
           </div>
 
-          <!-- Clear filters chip -->
           <button id="clearFilters" class="chip" aria-label="Clear search and category" title="Clear filters" hidden>
             Clear ✕
           </button>
 
-          <!-- Result count badge -->
           <span id="resultCount" class="result-count" aria-live="polite"></span>
         </div>
       </div>
@@ -112,285 +110,7 @@
   </footer>
 
   <!-- Page logic -->
-  <script>
-    // ----- Auth buttons (avatar menu) -----
-    const navRight = document.getElementById('navRight');
-    try {
-      const userId = localStorage.getItem('userId');
-      const authButtons = userId
-        ? `
-            <a href="create.html" class="nav-btn add-recipe">➕ Create Recipe</a>
-            <div class="avatar-wrap" id="accountMenu">
-              <button id="avatarBtn" class="avatar-btn" aria-haspopup="true" aria-expanded="false" title="Account">
-                <img id="avatarImg" alt="" />
-                <span id="avatarInitial">🙂</span>
-              </button>
-              <div id="avatarMenu" class="menu" role="menu" aria-label="Account">
-                <a href="settings.html" role="menuitem"><i class="fa-solid fa-user-gear"></i> Settings</a>
-                <a href="my-recipes.html" role="menuitem"><i class="fa-solid fa-book"></i> My Recipes</a>
-                <hr />
-                <button id="logoutItem" role="menuitem"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
-              </div>
-            </div>
-          `
-        : `<a href="login.html" class="nav-btn">🔐 Login</a>`;
-      if (navRight) navRight.insertAdjacentHTML("beforeend", authButtons);
-    } catch (e) {
-      console.warn('LocalStorage not available:', e);
-    }
+  <script defer src="/src/home.js"></script>
 
-    // ----- Elements & state -----
-    const grid      = document.getElementById('recipeGrid');
-    const qEl       = document.getElementById('searchInput');
-    const dropdown  = document.getElementById('categoryDropdown');
-    const toggleBtn = dropdown.querySelector('.dropdown-toggle');
-    const catLabel  = document.getElementById('catLabel');
-    const prevBtn   = document.getElementById('prevBtn');
-    const nextBtn   = document.getElementById('nextBtn');
-    const pageNum   = document.getElementById('pageNum');
-    const clearBtn  = document.getElementById('clearFilters');
-    const resultEl  = document.getElementById('resultCount');
-
-    const LIMIT = 12;
-    let currentPage = 1;
-    let currentCategory = '';
-    let currentQuery = '';
-    let totalResults = 0;
-
-    // ----- URL <-> state sync -----
-    function readStateFromURL() {
-      const u = new URL(location.href);
-      currentQuery    = u.searchParams.get('q') || '';
-      currentCategory = u.searchParams.get('category') || '';
-      currentPage     = Math.max(1, parseInt(u.searchParams.get('page') || '1', 10));
-
-      qEl.value = currentQuery;
-
-      const items = dropdown.querySelectorAll('.dropdown-item');
-      let activeBtn = null;
-      items.forEach(btn => {
-        const isActive = (btn.dataset.category || '') === currentCategory;
-        btn.classList.toggle('is-active', isActive);
-        if (isActive) { btn.setAttribute('aria-current', 'true'); activeBtn = btn; }
-        else { btn.removeAttribute('aria-current'); }
-      });
-      if (!activeBtn) {
-        const allBtn = dropdown.querySelector('.dropdown-item[data-category=""]');
-        if (allBtn) { allBtn.classList.add('is-active'); allBtn.setAttribute('aria-current','true'); activeBtn = allBtn; }
-      }
-      catLabel.textContent = activeBtn ? activeBtn.textContent.trim() : 'Categories';
-
-      updateClearVisibility();
-    }
-
-    function writeStateToURL() {
-      const u = new URL(location.href);
-      if (currentQuery) u.searchParams.set('q', currentQuery); else u.searchParams.delete('q');
-      if (currentCategory) u.searchParams.set('category', currentCategory); else u.searchParams.delete('category');
-      if (currentPage > 1) u.searchParams.set('page', String(currentPage)); else u.searchParams.delete('page');
-      history.replaceState(null, '', u.toString());
-      updateClearVisibility();
-    }
-
-    function updateClearVisibility() {
-      clearBtn.hidden = !(currentQuery || currentCategory);
-    }
-
-    function updateResultCount(visibleCount) {
-      if (!totalResults && !visibleCount) { resultEl.textContent = ''; return; }
-      const start = (currentPage - 1) * LIMIT + (visibleCount ? 1 : 0);
-      const end   = (currentPage - 1) * LIMIT + visibleCount;
-      resultEl.innerHTML = totalResults
-        ? `<span class="badge">${totalResults}</span> result${totalResults === 1 ? '' : 's'} · showing ${start}-${end}`
-        : `<span class="badge">${visibleCount}</span> result${visibleCount === 1 ? '' : 's'}`;
-    }
-
-    // ----- Load & render -----
-    async function load(page = 1) {
-      currentPage = page;
-      currentQuery = (qEl?.value || '').trim();
-
-      try {
-        const url = new URL('/api/recipes', location.origin);
-        if (currentQuery)    url.searchParams.set('q', currentQuery);
-        if (currentCategory) url.searchParams.set('category', currentCategory);
-        url.searchParams.set('page', currentPage);
-        url.searchParams.set('limit', LIMIT);
-        url.searchParams.set('meta', '1');
-
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`API ${res.status}`);
-
-        const data = await res.json();
-        const list = Array.isArray(data) ? data : (data.items || []);
-        totalResults = Array.isArray(data) ? 0 : (data.total ?? 0);
-
-        grid.innerHTML = list.length
-          ? list.map(r => `
-              <article class="recipe-card" tabindex="0" role="button" aria-label="Open ${r.title}">
-                <img src="${r.image || 'images/placeholder.jpg'}" alt="${r.title}" />
-                <h3>${r.title}</h3>
-              </article>
-            `).join('')
-          : '<p style="opacity:.7">No recipes found.</p>';
-
-        if (list.length) {
-          Array.from(grid.children).forEach((card, i) => {
-            const id = list[i].id;
-            card.addEventListener('click', () => location.href = `recipe.html?id=${id}`);
-            card.addEventListener('keydown', (e) => { if (e.key === 'Enter') location.href = `recipe.html?id=${id}`; });
-          });
-        }
-
-        if (totalResults) {
-          const maxPage = Math.max(1, Math.ceil(totalResults / LIMIT));
-          prevBtn.disabled = currentPage <= 1;
-          nextBtn.disabled = currentPage >= maxPage;
-        } else {
-          prevBtn.disabled = currentPage === 1;
-          nextBtn.disabled = list.length < LIMIT;
-        }
-        pageNum.textContent = currentPage;
-
-        updateResultCount(list.length);
-        writeStateToURL();
-      } catch (err) {
-        console.error('Load error:', err);
-        grid.innerHTML = `<p style="opacity:.7">Failed to load recipes.</p>`;
-        prevBtn.disabled = true;
-        nextBtn.disabled = true;
-        resultEl.textContent = '';
-      }
-    }
-
-    // ----- Events -----
-    qEl?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); load(1); }
-    });
-
-    // dropdown open/close
-    toggleBtn?.addEventListener('click', (e) => {
-      e.preventDefault();
-      const isOpen = dropdown.classList.toggle('open');
-      toggleBtn.setAttribute('aria-expanded', String(isOpen));
-    });
-    document.addEventListener('click', (e) => {
-      if (!dropdown.contains(e.target)) {
-        dropdown.classList.remove('open');
-        toggleBtn?.setAttribute('aria-expanded', 'false');
-      }
-    });
-
-    // category clicks + active mark
-    dropdown?.querySelectorAll('.dropdown-item').forEach(btn => {
-      btn.addEventListener('click', () => {
-        dropdown.querySelectorAll('.dropdown-item').forEach(x => {
-          x.classList.remove('is-active'); x.removeAttribute('aria-current');
-        });
-        btn.classList.add('is-active'); btn.setAttribute('aria-current','true');
-
-        currentCategory = btn.dataset.category || '';
-        catLabel.textContent = btn.textContent.trim() || 'Categories';
-        load(1);
-
-        dropdown.classList.remove('open');
-        toggleBtn?.setAttribute('aria-expanded','false');
-      });
-    });
-
-    // pagination
-    prevBtn.addEventListener('click', () => { if (currentPage > 1) load(currentPage - 1); });
-    nextBtn.addEventListener('click', () => { load(currentPage + 1); });
-
-    // clear filters
-    clearBtn.addEventListener('click', () => {
-      qEl.value = '';
-      currentQuery = '';
-      currentCategory = '';
-
-      const allBtn = dropdown.querySelector('.dropdown-item[data-category=""]');
-      dropdown.querySelectorAll('.dropdown-item').forEach(x => {
-        x.classList.remove('is-active'); x.removeAttribute('aria-current');
-      });
-      if (allBtn) {
-        allBtn.classList.add('is-active'); allBtn.setAttribute('aria-current','true');
-        catLabel.textContent = allBtn.textContent.trim() || 'Categories';
-      } else {
-        catLabel.textContent = 'Categories';
-      }
-      load(1);
-    });
-
-    // initial
-    document.addEventListener('DOMContentLoaded', () => {
-      readStateFromURL();
-      load(currentPage);
-    });
-
-    // ----- Avatar menu -----
-    (function () {
-      const btn   = document.getElementById('avatarBtn');
-      const img   = document.getElementById('avatarImg');
-      const init  = document.getElementById('avatarInitial');
-      const menu  = document.getElementById('avatarMenu');
-      const wrap  = document.getElementById('accountMenu');
-      if (!btn || !menu || !wrap || !img || !init) return;
-
-      try {
-        const name = (localStorage.getItem('username') || localStorage.getItem('email') || 'User').trim();
-        const avatar = localStorage.getItem('avatar') || '';
-        if (avatar) {
-          img.src = avatar;
-          btn.classList.add('has-photo');
-        } else {
-          init.textContent = (name[0] || 'U').toUpperCase();
-          btn.classList.remove('has-photo');
-          img.removeAttribute('src');
-        }
-      } catch {
-        init.textContent = 'U';
-      }
-
-      function openMenu(open) { menu.classList.toggle('open', open); btn.setAttribute('aria-expanded', String(open)); }
-
-      btn.addEventListener('click', (e) => { e.stopPropagation(); openMenu(!menu.classList.contains('open')); });
-      document.addEventListener('click', (e) => { if (!wrap.contains(e.target)) openMenu(false); });
-      btn.addEventListener('keydown', (e) => { if (e.key === 'Escape') openMenu(false); });
-
-      document.getElementById('logoutItem')?.addEventListener('click', () => {
-        try { ['userId','username','email','avatar'].forEach(k => localStorage.removeItem(k)); } catch {}
-        location.href = 'index.html';
-      });
-    })();
-
-    // ----- Dark mode -----
-    (function () {
-      const btn = document.getElementById('darkToggle');
-      if (!btn) return;
-
-      const KEY = 'theme';
-      let theme = null;
-      try { theme = localStorage.getItem(KEY); } catch {}
-      if (!theme) {
-        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-          ? 'dark' : 'light';
-      }
-
-      function apply(t) {
-        document.body.classList.toggle('dark', t === 'dark');
-        const isDark = t === 'dark';
-        btn.textContent = isDark ? '☀️' : '🌙';
-        btn.title = isDark ? 'Switch to light mode' : 'Switch to dark mode';
-      }
-
-      apply(theme);
-
-      btn.addEventListener('click', () => {
-        const newTheme = document.body.classList.contains('dark') ? 'light' : 'dark';
-        apply(newTheme);
-        try { localStorage.setItem(KEY, newTheme); } catch {}
-      });
-    })();
-  </script>
 </body>
 </html>

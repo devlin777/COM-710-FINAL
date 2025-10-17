@@ -9,7 +9,7 @@ const app = express();
 require('../config/db');
 
 // Middleware
-app.use(helmet()); // add safe default HTTP headers
+app.use(helmet({ contentSecurityPolicy: false })); // explicitly off
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
