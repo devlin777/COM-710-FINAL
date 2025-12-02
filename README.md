@@ -1,4 +1,4 @@
-ChefChecker — Recipe Finder (COM-710 Coursework)
+Whiskly — Recipe Finder (COM-710 Coursework)
 
 A small full-stack web app for discovering and managing recipes. Built with Node.js + Express + SQLite on the backend and vanilla HTML/CSS/JS on the frontend. Features include search, category filters, dark/light mode, login/register, create/edit recipes with image upload, favorites, comments (with author edit/delete), and a simple profile (bio/avatar/password).
 
